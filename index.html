@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProgrammDuck</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1405;
+      --surface: #241b08;
+      --border: #3a2b0d;
+      --accent: #ffd54f;
+      --accent-strong: #ffb300;
+      --text: #fff8e1;
+      --muted: #c6a94a;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #2a200a 0%, #140f04 100%);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(255, 193, 7, 0.15);
+      animation: cardPop 0.8s ease;
+    }
+
+    @keyframes cardPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .avatar-wrap img {
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .avatar-wrap img:hover {
+      transform: rotate(5deg) scale(1.05);
+    }
+
+    .name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .name span {
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(255, 213, 79, 0.6);
+    }
+
+    .bio {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .tag {
+      background: rgba(255, 213, 79, 0.1);
+      border: 1px solid rgba(255, 213, 79, 0.4);
+      color: var(--accent);
+      font-size: 0.68rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      transition: 0.3s ease;
+    }
+
+    .tag:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 1rem 0 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      background: rgba(255,255,255,0.02);
+      transition: 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-item::before {
+      content: '';
+      position: absolute;
+      left: -100%;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,213,79,0.15), transparent);
+      transition: 0.5s;
+    }
+
+    .link-item:hover::before {
+      left: 100%;
+    }
+
+    .link-item:hover {
+      border-color: var(--accent);
+      transform: translateX(6px);
+    }
+
+    .link-item img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .link-label { flex: 1; }
+
+    .link-handle {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .donate {
+      border-color: var(--accent-strong);
+    }
+
+    .donate:hover {
+      background: rgba(255,179,0,0.1);
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.65rem;
+      color: var(--border);
+    }
+  
+
+    /* === Animated Background === */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,213,79,0.25) 0%, rgba(255,179,0,0.15) 40%, transparent 70%);
+      filter: blur(60px);
+      z-index: 0;
+      animation: float 18s infinite alternate ease-in-out;
+    }
+
+    body::before {
+      top: -100px;
+      left: -100px;
+    }
+
+    body::after {
+      bottom: -120px;
+      right: -120px;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(80px, 60px) scale(1.1); }
+      100% { transform: translate(-60px, -40px) scale(0.95); }
+    }
+
+    .card { position: relative; z-index: 1; }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="avatar-wrap">
+      <img src="/Sources/avatar.jpg" alt="ProgrammDuck avatar" />
+    </div>
+
+    <div class="name">Programm<span>Duck</span></div>
+    <div class="bio">
+      Hi! I'm Ilya — making Discord bots & writing code.<br/>
+    </div>
+
+    <div class="tags">
+      <span class="tag">Python</span>
+      <span class="tag">C#</span>
+      <span class="tag">Luau</span>
+      <span class="tag">Discord Bots</span>
+      <span class="tag">SysAdmin</span>
+    </div>
+
+    <div class="section-title">💬 Social</div>
+    <div class="links">
+      <a class="link-item" href="https://discord.com/users/ProgrammDuck" target="_blank">
+        <img src="/Sources/discord.png" alt="Discord" />
+        <span class="link-label">Discord</span>
+        <span class="link-handle">ProgrammDuck</span>
+      </a>
+
+      <a class="link-item" href="https://t.me/ProgrammDuck" target="_blank">
+        <img src="/Sources/telegram.png" alt="Telegram" />
+        <span class="link-label">Telegram</span>
+        <span class="link-handle">@ProgrammDuck</span>
+      </a>
+
+      <a class="link-item" href="mailto:ProgrammDuck@yandex.ru">
+        <img src="/Sources/gmail.png" alt="Email" />
+        <span class="link-label">Email</span>
+        <span class="link-handle">ProgrammDuck@yandex.ru<br>programmduck@xyecoc.com</span>
+      </a>
+    </div>
+
+    <div class="section-title">🌍 Platforms</div>
+    <div class="links">
+      <a class="link-item" href="https://github.com/ProgrammDuck" target="_blank">
+        <img src="/Sources/github.svg" alt="GitHub" />
+        <span class="link-label">GitHub</span>
+        <span class="link-handle">ProgrammDuck</span>
+      </a>
+
+      <a class="link-item" href="https://www.youtube.com/@ProgrammDuck" target="_blank">
+        <img src="/Sources/youtube.jpeg" alt="YouTube" />
+        <span class="link-label">YouTube</span>
+        <span class="link-handle">@ProgrammDuck</span>
+      </a>
+
+      <a class="link-item" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi?si=9c97cd3726894dba" target="_blank">
+        <img src="/Sources/spotify.png" alt="Reddit" />
+        <span class="link-label">Spotify</span>
+        <span class="link-handle">ProgrammDuck</span>
+      </a>
+    </div>
+
+    <div class="section-title">💛 Support</div>
+    <div class="links">
+      <a class="link-item donate" href="https://www.donationalerts.com/r/ProgrammDuck" target="_blank">
+        <img src="/Sources/DA.svg" alt="Donation" />
+        <span class="link-label">Donation</span>
+        <span class="link-handle">DonationAlerts</span>
+      </a>
+    </div>
+
+    <div class="footer">© ProgrammDuck</div>
+  </div>
+  
+  <canvas id="particles"></canvas>
+
+  <script>
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+
+    let particlesArray = [];
+    const numberOfParticles = 80;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,213,79,0.6)';
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particlesArray = [];
+      for (let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesArray.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+
+    // Parallax
+    document.addEventListener('mousemove', (e) => {
+      const x = (window.innerWidth / 2 - e.clientX) / 30;
+      const y = (window.innerHeight / 2 - e.clientY) / 30;
+      document.querySelector('.card').style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+  </script>
+
+  <style>
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .card {
+      transition: transform 0.2s ease-out;
+    }
+  </style>
+
+</body>
+</html>
