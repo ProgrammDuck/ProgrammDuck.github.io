@@ -478,35 +478,39 @@
     }
 
     .proxy-label {
-      font-size: 0.6rem;
-      color: var(--muted);
+      font-size: 0.65rem;
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 1.5px;
       margin-bottom: 0.3rem;
+      opacity: 0.75;
     }
 
     .proxy-value {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255, 213, 79, 0.2);
       border-radius: 8px;
       padding: 0.5rem 0.7rem;
-      font-size: 0.75rem;
-      color: var(--text);
+      font-size: 0.8rem;
+      color: #fff;
       word-break: break-all;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, background 0.2s ease;
       cursor: default;
       user-select: all;
       position: relative;
+      text-shadow: 0 0 6px rgba(255,255,255,0.15);
     }
 
     .proxy-value:hover {
-      border-color: rgba(255, 213, 79, 0.4);
+      border-color: rgba(255, 213, 79, 0.6);
+      background: rgba(255,255,255,0.09);
     }
 
     .proxy-value.empty {
-      color: var(--border);
+      color: #6b5a2e;
       font-style: italic;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
+      text-shadow: none;
     }
 
     .proxy-divider {
