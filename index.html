@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#1a1405" />
   <title>ProgrammDuck</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
@@ -23,11 +24,14 @@
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
       min-height: 100vh;
+      min-height: 100dvh; /* dynamic viewport for mobile */
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       animation: fadeIn 1s ease;
+      /* Prevent horizontal scroll on mobile */
+      overflow-x: hidden;
     }
 
     @keyframes fadeIn {
@@ -46,6 +50,9 @@
       overflow: hidden;
       box-shadow: 0 0 40px rgba(255, 193, 7, 0.15);
       animation: cardPop 0.8s ease;
+      z-index: 1;
+      /* Smooth touch transition instead of mouse parallax */
+      transition: transform 0.2s ease-out;
     }
 
     @keyframes cardPop {
@@ -66,10 +73,17 @@
       border: 3px solid var(--accent);
       object-fit: cover;
       transition: transform 0.3s ease;
+      /* Better tap target */
+      -webkit-tap-highlight-color: transparent;
     }
 
     .avatar-wrap img:hover {
       transform: rotate(5deg) scale(1.05);
+    }
+
+    /* Tap animation for avatar on mobile */
+    .avatar-wrap img:active {
+      transform: scale(0.95);
     }
 
     .name {
@@ -109,11 +123,20 @@
       border-radius: 999px;
       text-transform: uppercase;
       transition: 0.3s ease;
+      /* Better touch target */
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
     .tag:hover {
       background: var(--accent);
       color: #000;
+    }
+
+    .tag:active {
+      background: var(--accent);
+      color: #000;
+      transform: scale(0.95);
     }
 
     .section-title {
@@ -134,7 +157,8 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.7rem 1rem;
+      /* Bigger touch target on mobile */
+      padding: 0.85rem 1rem;
       border: 1px solid var(--border);
       border-radius: 12px;
       text-decoration: none;
@@ -144,6 +168,10 @@
       transition: 0.25s ease;
       position: relative;
       overflow: hidden;
+      /* Tap highlight removal */
+      -webkit-tap-highlight-color: transparent;
+      /* Prevent long-press menu on mobile */
+      -webkit-touch-callout: none;
     }
 
     .link-item::before {
@@ -166,10 +194,18 @@
       transform: translateX(6px);
     }
 
+    /* Mobile tap feedback */
+    .link-item:active {
+      border-color: var(--accent);
+      background: rgba(255, 213, 79, 0.08);
+      transform: scale(0.98);
+    }
+
     .link-item img {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       object-fit: contain;
+      flex-shrink: 0;
     }
 
     .link-label { flex: 1; }
@@ -177,6 +213,8 @@
     .link-handle {
       color: var(--muted);
       font-size: 0.72rem;
+      text-align: right;
+      word-break: break-all;
     }
 
     .donate {
@@ -193,7 +231,6 @@
       font-size: 0.65rem;
       color: var(--border);
     }
-  
 
     /* === Animated Background === */
     body::before,
@@ -226,8 +263,159 @@
       100% { transform: translate(-60px, -40px) scale(0.95); }
     }
 
-    .card { position: relative; z-index: 1; }
+    /* === Canvas particles === */
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
 
+    /* ===========================
+       MOBILE RESPONSIVE STYLES
+       =========================== */
+
+    /* Small phones (< 360px) */
+    @media (max-width: 359px) {
+      .card {
+        padding: 1.75rem 1.25rem;
+        border-radius: 16px;
+      }
+
+      .name {
+        font-size: 1.35rem;
+      }
+
+      .avatar-wrap img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .link-item {
+        font-size: 0.76rem;
+        padding: 0.75rem 0.85rem;
+        gap: 0.6rem;
+      }
+
+      .link-handle {
+        font-size: 0.65rem;
+      }
+
+      .tags {
+        gap: 0.35rem;
+      }
+
+      .tag {
+        font-size: 0.62rem;
+        padding: 0.2rem 0.5rem;
+      }
+    }
+
+    /* Standard mobile (360–480px) */
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem 0.75rem;
+        align-items: flex-start;
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+        max-width: 100%;
+      }
+
+      .link-item {
+        padding: 0.9rem 1rem;
+        gap: 0.65rem;
+      }
+
+      /* On mobile, slide effect might feel laggy — soften it */
+      .link-item:hover {
+        transform: none;
+      }
+
+      .link-item:active {
+        transform: scale(0.98);
+      }
+
+      /* Disable parallax on mobile (handled in JS too) */
+      .card {
+        transform: none !important;
+      }
+    }
+
+    /* Tablets (481–768px) */
+    @media (min-width: 481px) and (max-width: 768px) {
+      body {
+        padding: 2rem 1.5rem;
+      }
+
+      .card {
+        max-width: 420px;
+        padding: 2.25rem 1.75rem;
+      }
+    }
+
+    /* Landscape mobile */
+    @media (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding: 1rem;
+        align-items: flex-start;
+      }
+
+      .card {
+        padding: 1.5rem;
+        max-width: 380px;
+      }
+
+      .avatar-wrap {
+        margin-bottom: 0.75rem;
+      }
+
+      .avatar-wrap img {
+        width: 70px;
+        height: 70px;
+      }
+
+      .name {
+        font-size: 1.3rem;
+      }
+
+      .tags {
+        margin: 0.75rem 0 1rem;
+      }
+
+      .section-title {
+        margin: 0.75rem 0 0.4rem;
+      }
+
+      .links {
+        gap: 0.45rem;
+      }
+
+      .link-item {
+        padding: 0.65rem 0.85rem;
+      }
+
+      /* Reduce particles on landscape to keep perf */
+    }
+
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      body, .card, .avatar-wrap img, .link-item, .tag {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      body::before, body::after {
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -252,19 +440,19 @@
 
     <div class="section-title">💬 Social</div>
     <div class="links">
-      <a class="link-item" href="https://discord.com/users/ProgrammDuck" target="_blank">
+      <a class="link-item" href="https://discord.com/users/ProgrammDuck" target="_blank" rel="noopener">
         <img src="Sources/discord.png" alt="Discord" />
         <span class="link-label">Discord</span>
         <span class="link-handle">ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="https://t.me/ProgrammDuck" target="_blank">
+      <a class="link-item" href="https://t.me/ProgrammDuck" target="_blank" rel="noopener">
         <img src="Sources/telegram.png" alt="Telegram" />
         <span class="link-label">Telegram</span>
         <span class="link-handle">@ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="https://steamcommunity.com/profiles/76561199568743099/" target="_blank">
+      <a class="link-item" href="https://steamcommunity.com/profiles/76561199568743099/" target="_blank" rel="noopener">
         <img src="Sources/steam.png" alt="Steam" />
         <span class="link-label">Steam</span>
         <span class="link-handle">ProgrammDuck</span>
@@ -273,26 +461,26 @@
       <a class="link-item" href="mailto:ProgrammDuck@yandex.ru">
         <img src="Sources/gmail.png" alt="Email" />
         <span class="link-label">Email</span>
-        <span class="link-handle">ProgrammDuck@yandex.ru<br>programmduck@xyecoc.com</span>
+        <span class="link-handle">ProgrammDuck@yandex.ru</span>
       </a>
     </div>
 
     <div class="section-title">🌍 Platforms</div>
     <div class="links">
-      <a class="link-item" href="https://github.com/ProgrammDuck" target="_blank">
+      <a class="link-item" href="https://github.com/ProgrammDuck" target="_blank" rel="noopener">
         <img src="Sources/github.svg" alt="GitHub" />
         <span class="link-label">GitHub</span>
         <span class="link-handle">ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="https://www.youtube.com/@ProgrammDuck" target="_blank">
+      <a class="link-item" href="https://www.youtube.com/@ProgrammDuck" target="_blank" rel="noopener">
         <img src="Sources/Youtube.jpg" alt="YouTube" />
         <span class="link-label">YouTube</span>
         <span class="link-handle">@ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi?si=9c97cd3726894dba" target="_blank">
-        <img src="Sources/spotify.png" alt="Reddit" />
+      <a class="link-item" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi?si=9c97cd3726894dba" target="_blank" rel="noopener">
+        <img src="Sources/spotify.png" alt="Spotify" />
         <span class="link-label">Spotify</span>
         <span class="link-handle">ProgrammDuck</span>
       </a>
@@ -300,7 +488,7 @@
 
     <div class="section-title">💛 Support</div>
     <div class="links">
-      <a class="link-item donate" href="https://www.donationalerts.com/r/ProgrammDuck" target="_blank">
+      <a class="link-item donate" href="https://www.donationalerts.com/r/ProgrammDuck" target="_blank" rel="noopener">
         <img src="Sources/DA.svg" alt="Donation" />
         <span class="link-label">Donation</span>
         <span class="link-handle">DonationAlerts</span>
@@ -309,7 +497,7 @@
 
     <div class="footer">© ProgrammDuck - 2026</div>
   </div>
-  
+
   <canvas id="particles"></canvas>
 
   <script>
@@ -317,7 +505,10 @@
     const ctx = canvas.getContext('2d');
 
     let particlesArray = [];
-    const numberOfParticles = 80;
+
+    // Detect mobile for performance tuning
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const numberOfParticles = isMobile ? 35 : 80;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -339,7 +530,6 @@
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
-
         if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
         if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
       }
@@ -371,30 +561,26 @@
     initParticles();
     animateParticles();
 
-    // Parallax
-    document.addEventListener('mousemove', (e) => {
-      const x = (window.innerWidth / 2 - e.clientX) / 30;
-      const y = (window.innerHeight / 2 - e.clientY) / 30;
-      document.querySelector('.card').style.transform = `translate(${x}px, ${y}px)`;
-    });
+    // Parallax — only on non-touch devices
+    const card = document.querySelector('.card');
 
+    if (!isMobile && window.matchMedia('(hover: hover)').matches) {
+      document.addEventListener('mousemove', (e) => {
+        const x = (window.innerWidth / 2 - e.clientX) / 30;
+        const y = (window.innerHeight / 2 - e.clientY) / 30;
+        card.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    }
+
+    // Touch tilt effect for mobile (subtle gyro-like feel)
+    if (window.DeviceOrientationEvent && isMobile) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma === null) return;
+        const x = Math.max(-8, Math.min(8, e.gamma / 5));
+        const y = Math.max(-8, Math.min(8, (e.beta - 45) / 10));
+        card.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    }
   </script>
-
-  <style>
-    #particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .card {
-      transition: transform 0.2s ease-out;
-    }
-  </style>
-
 </body>
 </html>
