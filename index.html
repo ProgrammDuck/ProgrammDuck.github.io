@@ -98,6 +98,22 @@
       text-shadow: 0 0 8px rgba(255, 213, 79, 0.6);
     }
 
+    .email-link {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .email-link:hover {
+      opacity: 0.7;
+      text-decoration: underline;
+    }
+
+    .email-link:active {
+      opacity: 0.5;
+    }
+
+
     .bio {
       font-size: 0.8rem;
       color: var(--muted);
@@ -211,7 +227,7 @@
     .link-label { flex: 1; }
 
     .link-handle {
-      color: var(--muted);
+      color: var(--accent);
       font-size: 0.72rem;
       text-align: right;
       word-break: break-all;
@@ -706,11 +722,20 @@
         <span class="link-handle">ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="/cdn-cgi/l/email-protection#075775686075666a6a4372646c477e666963627f297572">
+      <div class="link-item">
         <img src="Sources/gmail.png" alt="Email" />
         <span class="link-label">Email</span>
-        <span class="link-handle"><span class="__cf_email__" data-cfemail="164664797164777b7b5263757d566f777872736e386463">[email&#160;protected]</span></span>
-      </a>
+        <span class="link-handle">
+          <a href="mailto:ProgrammDuck@yandex.ru" class="email-link">
+            ProgrammDuck@yandex.ru
+          </a><br>
+          <a href="mailto:ProgrammDuck@xyecoc.com" class="email-link">
+            ProgrammDuck@xyecoc.com
+          </a>
+        </span>
+      </div>
+
+
     </div>
 
     <div class="section-title">🌍 Platforms</div>
