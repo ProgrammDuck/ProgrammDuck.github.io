@@ -416,9 +416,253 @@
         animation: none !important;
       }
     }
+
+    /* === PROXY PANEL === */
+
+    .layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 1;
+      width: 100%;
+      position: relative;
+    }
+
+    .proxy-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem 1.25rem;
+      width: 200px;
+      flex-shrink: 0;
+      box-shadow: 0 0 30px rgba(255, 193, 7, 0.1);
+      animation: cardPop 0.9s ease;
+      position: absolute;
+      right: calc(50% - 440px / 2 - 200px - 1.5rem);
+      top: 0;
+      overflow: hidden;
+      transition: transform 0.2s ease-out;
+    }
+
+    .proxy-panel::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,213,79,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .proxy-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(255, 213, 79, 0.4);
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .proxy-field {
+      margin-bottom: 0.85rem;
+    }
+
+    .proxy-field:last-child {
+      margin-bottom: 0;
+    }
+
+    .proxy-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.3rem;
+    }
+
+    .proxy-value {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.7rem;
+      font-size: 0.75rem;
+      color: var(--text);
+      word-break: break-all;
+      transition: border-color 0.2s ease;
+      cursor: default;
+      user-select: all;
+      position: relative;
+    }
+
+    .proxy-value:hover {
+      border-color: rgba(255, 213, 79, 0.4);
+    }
+
+    .proxy-value.empty {
+      color: var(--border);
+      font-style: italic;
+      font-size: 0.7rem;
+    }
+
+    .proxy-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1rem 0;
+      opacity: 0.5;
+    }
+
+    /* Copy feedback */
+    .proxy-value::after {
+      content: 'copied!';
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.6rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .proxy-value.copied::after {
+      opacity: 1;
+    }
+
+    /* === MOBILE: proxy panel collapses to accordion === */
+    .proxy-toggle {
+      display: none;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 0.6rem;
+      align-items: center;
+      gap: 0.5rem;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.2s ease;
+    }
+
+    .proxy-toggle:active {
+      border-color: var(--accent);
+      background: rgba(255,213,79,0.05);
+    }
+
+    .proxy-toggle-icon {
+      margin-left: auto;
+      transition: transform 0.3s ease;
+      color: var(--muted);
+    }
+
+    .proxy-toggle.open .proxy-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .proxy-toggle .toggle-label {
+      color: var(--accent);
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        flex-direction: column;
+        align-items: center;
+        max-width: 440px;
+      }
+
+      .proxy-panel {
+        width: 100%;
+        max-width: 440px;
+        order: 2;
+        padding: 0;
+        border: none;
+        background: none;
+        box-shadow: none;
+        animation: none;
+        position: static;
+        right: auto;
+        top: auto;
+        transform: none !important;
+      }
+
+      .proxy-panel::before { display: none; }
+
+      .proxy-toggle {
+        display: flex;
+      }
+
+      .proxy-inner {
+        display: none;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 0;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .proxy-inner.open {
+        display: block;
+      }
+
+      .proxy-title {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .proxy-inner {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="layout">
+
+  <!-- PROXY PANEL -->
+  <div class="proxy-panel">
+    <button class="proxy-toggle" id="proxyToggle" onclick="toggleProxy()">
+      🔒 <span class="toggle-label">Proxy</span>
+      <span class="proxy-toggle-icon">▼</span>
+    </button>
+    <div class="proxy-inner" id="proxyInner">
+      <div class="proxy-title">🔒 Proxy (Socks5)</div>
+
+      <div class="proxy-field">
+        <div class="proxy-label">IP Address</div>
+        <div class="proxy-value empty" id="proxy-ip" onclick="copyField(this)">87.106.81.95</div>
+      </div>
+      <div class="proxy-field">
+        <div class="proxy-label">Port</div>
+        <div class="proxy-value empty" id="proxy-port" onclick="copyField(this)">1081</div>
+      </div>
+
+      <hr class="proxy-divider" />
+
+      <div class="proxy-field">
+        <div class="proxy-label">Login</div>
+        <div class="proxy-value empty" id="proxy-login" onclick="copyField(this)">User</div>
+      </div>
+      <div class="proxy-field">
+        <div class="proxy-label">Password</div>
+        <div class="proxy-value empty" id="proxy-password" onclick="copyField(this)">privetinetkuzka228@!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
   <div class="card">
 
     <div class="avatar-wrap">
@@ -458,10 +702,10 @@
         <span class="link-handle">ProgrammDuck</span>
       </a>
 
-      <a class="link-item" href="mailto:ProgrammDuck@yandex.ru">
+      <a class="link-item" href="/cdn-cgi/l/email-protection#075775686075666a6a4372646c477e666963627f297572">
         <img src="Sources/gmail.png" alt="Email" />
         <span class="link-label">Email</span>
-        <span class="link-handle">ProgrammDuck@yandex.ru</span>
+        <span class="link-handle"><span class="__cf_email__" data-cfemail="164664797164777b7b5263757d566f777872736e386463">[email&#160;protected]</span></span>
       </a>
     </div>
 
@@ -496,11 +740,13 @@
     </div>
 
     <div class="footer">© ProgrammDuck - 2026</div>
-  </div>
+  </div><!-- /card -->
+
+  </div><!-- /layout -->
 
   <canvas id="particles"></canvas>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
 
@@ -563,12 +809,15 @@
 
     // Parallax — only on non-touch devices
     const card = document.querySelector('.card');
+    const proxyPanel = document.querySelector('.proxy-panel');
 
     if (!isMobile && window.matchMedia('(hover: hover)').matches) {
       document.addEventListener('mousemove', (e) => {
         const x = (window.innerWidth / 2 - e.clientX) / 30;
         const y = (window.innerHeight / 2 - e.clientY) / 30;
         card.style.transform = `translate(${x}px, ${y}px)`;
+        // Proxy panel moves slightly slower for depth effect
+        proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
       });
     }
 
@@ -579,7 +828,46 @@
         const x = Math.max(-8, Math.min(8, e.gamma / 5));
         const y = Math.max(-8, Math.min(8, (e.beta - 45) / 10));
         card.style.transform = `translate(${x}px, ${y}px)`;
+        proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
       });
+    }
+
+    // === PROXY PANEL ===
+
+    // To set values, edit these:
+    const PROXY = {
+      ip:       '',   // e.g. '192.168.1.1'
+      port:     '',   // e.g. '8080'
+      login:    '',   // e.g. 'mylogin'
+      password: ''    // e.g. 'mypassword'
+    };
+
+    function applyProxy() {
+      const fields = ['ip', 'port', 'login', 'password'];
+      fields.forEach(key => {
+        const el = document.getElementById('proxy-' + key);
+        if (PROXY[key]) {
+          el.textContent = PROXY[key];
+          el.classList.remove('empty');
+        }
+      });
+    }
+
+    applyProxy();
+
+    function copyField(el) {
+      if (el.classList.contains('empty')) return;
+      navigator.clipboard.writeText(el.textContent).then(() => {
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 1500);
+      });
+    }
+
+    function toggleProxy() {
+      const btn = document.getElementById('proxyToggle');
+      const inner = document.getElementById('proxyInner');
+      btn.classList.toggle('open');
+      inner.classList.toggle('open');
     }
   </script>
 </body>
