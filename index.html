@@ -20,7 +20,7 @@
     }
 
     body {
-      background: radial-gradient(circle at top, #2a200a 0%, #140f04 100%);
+      background: #140f04; /* fallback while video loads */
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
       min-height: 100vh;
@@ -32,11 +32,108 @@
       animation: fadeIn 1s ease;
       /* Prevent horizontal scroll on mobile */
       overflow-x: hidden;
+      position: relative;
     }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === Background video === */
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -3;
+      filter: brightness(0.55) saturate(1.1);
+    }
+
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: radial-gradient(circle at top, rgba(42,32,10,0.55) 0%, rgba(20,15,4,0.75) 100%);
+      pointer-events: none;
+    }
+
+    .sound-hint {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(36, 27, 8, 0.85);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.7rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+    }
+
+    .sound-hint.hidden {
+      opacity: 0;
+    }
+
+    @media (max-width: 480px) {
+      .sound-hint {
+        font-size: 0.62rem;
+        padding: 0.45rem 0.75rem;
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+      }
+    }
+
+    /* === CARD TOGGLE BUTTON === */
+    .card-toggle-btn {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.12);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .card-toggle-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255, 213, 79, 0.08);
+    }
+
+    .card-toggle-btn:active {
+      transform: translateX(-50%) scale(0.96);
+    }
+
+    @media (max-width: 480px) {
+      .card-toggle-btn {
+        top: 0.75rem;
+        font-size: 0.68rem;
+        padding: 0.45rem 0.9rem;
+      }
     }
 
     .card {
@@ -52,7 +149,11 @@
       animation: cardPop 0.8s ease;
       z-index: 1;
       /* Smooth touch transition instead of mouse parallax */
-      transition: transform 0.2s ease-out;
+      transition: transform 0.2s ease-out, opacity 0.25s ease;
+    }
+
+    .card.card-hidden {
+      display: none !important;
     }
 
     @keyframes cardPop {
@@ -248,7 +349,7 @@
       color: var(--border);
     }
 
-    /* === Animated Background === */
+    /* === Animated Background glow blobs (kept above video, below content) === */
     body::before,
     body::after {
       content: '';
@@ -258,7 +359,7 @@
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255,213,79,0.25) 0%, rgba(255,179,0,0.15) 40%, transparent 70%);
       filter: blur(60px);
-      z-index: 0;
+      z-index: -1;
       animation: float 18s infinite alternate ease-in-out;
     }
 
@@ -649,6 +750,19 @@
   </style>
 </head>
 <body>
+
+  <!-- Background video -->
+  <video id="bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="Sources/MyVideo.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+  <div id="sound-hint" class="sound-hint">🔇 Нажмите в любом месте, чтобы включить звук</div>
+
+  <!-- CARD TOGGLE BUTTON -->
+  <button id="cardToggleBtn" class="card-toggle-btn" onclick="toggleCard()">
+    🙈 <span id="cardToggleLabel">Скрыть карточку</span>
+  </button>
+
   <div class="layout">
     
   <!-- PROXY PANEL
@@ -683,7 +797,7 @@
   </div> -->
 
   <!-- MAIN CARD -->
-  <div class="card">
+  <div class="card" id="mainCard">
 
     <div class="avatar-wrap">
       <img src="Sources/avatar.jpg" alt="ProgrammDuck avatar" />
@@ -846,7 +960,7 @@
         const y = (window.innerHeight / 2 - e.clientY) / 30;
         card.style.transform = `translate(${x}px, ${y}px)`;
         // Proxy panel moves slightly slower for depth effect
-        proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
+        if (proxyPanel) proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
       });
     }
 
@@ -857,7 +971,7 @@
         const x = Math.max(-8, Math.min(8, e.gamma / 5));
         const y = Math.max(-8, Math.min(8, (e.beta - 45) / 10));
         card.style.transform = `translate(${x}px, ${y}px)`;
-        proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
+        if (proxyPanel) proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
       });
     }
 
@@ -875,7 +989,7 @@
       const fields = ['ip', 'port', 'login', 'password'];
       fields.forEach(key => {
         const el = document.getElementById('proxy-' + key);
-        if (PROXY[key]) {
+        if (el && PROXY[key]) {
           el.textContent = PROXY[key];
           el.classList.remove('empty');
         }
@@ -898,6 +1012,47 @@
       btn.classList.toggle('open');
       inner.classList.toggle('open');
     }
+
+    // === CARD TOGGLE (show/hide card completely) ===
+    function toggleCard() {
+      const mainCard = document.getElementById('mainCard');
+      const btn = document.getElementById('cardToggleBtn');
+      const label = document.getElementById('cardToggleLabel');
+      const isHidden = mainCard.classList.toggle('card-hidden');
+      if (isHidden) {
+        btn.firstChild.textContent = '👀 ';
+        label.textContent = 'Показать карточку';
+      } else {
+        btn.firstChild.textContent = '🙈 ';
+        label.textContent = 'Скрыть карточку';
+      }
+    }
+
+    // === Unmute background video on first user interaction ===
+    (function() {
+      const bgVideo = document.getElementById('bg-video');
+      const hint = document.getElementById('sound-hint');
+      let unmuted = false;
+
+      function unmuteVideo() {
+        if (unmuted) return;
+        unmuted = true;
+        bgVideo.muted = false;
+        bgVideo.play().catch(() => {
+          // If play() is rejected for some reason, re-mute so it can keep autoplaying
+          bgVideo.muted = true;
+          unmuted = false;
+        });
+        if (hint) hint.classList.add('hidden');
+        document.removeEventListener('click', unmuteVideo);
+        document.removeEventListener('touchstart', unmuteVideo);
+        document.removeEventListener('keydown', unmuteVideo);
+      }
+
+      document.addEventListener('click', unmuteVideo);
+      document.addEventListener('touchstart', unmuteVideo);
+      document.addEventListener('keydown', unmuteVideo);
+    })();
   </script>
 </body>
 </html>
