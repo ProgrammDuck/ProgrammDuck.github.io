@@ -143,7 +143,7 @@
     }
 
     /* === BUTTONS (CARD TOGGLE & MUTE TOGGLE) === */
-    .card-toggle-btn, .mute-toggle-btn {
+    .card-toggle-btn {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--accent);
@@ -160,13 +160,85 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .card-toggle-btn:hover, .mute-toggle-btn:hover {
+    .card-toggle-btn:hover {
       border-color: var(--accent);
       background: rgba(255, 213, 79, 0.08);
     }
 
-    .card-toggle-btn:active, .mute-toggle-btn:active {
+    .card-toggle-btn:active {
       transform: scale(0.96);
+    }
+
+    /* === VOLUME CONTROL CONTAINER === */
+    .volume-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.12);
+    }
+
+    .mute-toggle-btn {
+      background: none;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mute-toggle-btn:active {
+      transform: scale(0.85);
+    }
+
+    #volumeSlider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 70px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #volumeSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255, 213, 79, 0.8);
+      transition: transform 0.1s ease;
+    }
+
+    #volumeSlider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    #volumeSlider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border: none;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255, 213, 79, 0.8);
+      transition: transform 0.1s ease;
+    }
+
+    #volumeSlider::-moz-range-thumb:hover {
+      transform: scale(1.2);
     }
 
     @media (max-width: 480px) {
@@ -175,9 +247,15 @@
         width: calc(100% - 1.5rem);
         justify-content: center;
       }
-      .card-toggle-btn, .mute-toggle-btn {
+      .card-toggle-btn {
         font-size: 0.68rem;
         padding: 0.45rem 0.8rem;
+      }
+      .volume-container {
+        padding: 0.35rem 0.7rem;
+      }
+      #volumeSlider {
+        width: 60px;
       }
     }
 
@@ -813,9 +891,9 @@
     </div>
   </div>
 
-  <!-- Background video -->
+  <!-- Background video (src динамически назначается из JS) -->
   <video id="bg-video" class="content-blur-state" muted loop playsinline preload="auto">
-    <source src="Sources/MyVideo.mp4" type="video/mp4">
+    <source src="" type="video/mp4">
   </video>
   <div class="video-overlay"></div>
 
@@ -824,9 +902,12 @@
     <button id="cardToggleBtn" class="card-toggle-btn" onclick="toggleCard()">
       🙈 <span id="cardToggleLabel">Скрыть карточку</span>
     </button>
-    <button id="soundToggleBtn" class="mute-toggle-btn" onclick="toggleSound()">
-      🔇 <span id="soundToggleLabel">Звук: Выкл</span>
-    </button>
+    <div class="volume-container">
+      <button id="soundToggleBtn" class="mute-toggle-btn" onclick="toggleMute()" title="Вкл/Выкл звук">
+        🔇
+      </button>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" oninput="changeVolume(this.value)">
+    </div>
   </div>
 
   <div class="layout">
@@ -956,6 +1037,50 @@
   <canvas id="particles"></canvas>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ==========================================
+    // === НАСТРОЙКИ САЙТА (КОНФИГУРАЦИЯ) ===
+    // ==========================================
+
+    // 1. Укажите путь к вашему фоновому видео:
+    const VIDEO_SRC = 'https://r2.guns.lol/47592398-6ee9-4c8f-9331-6d6652924469.mp4'; 
+
+    // 2. Укажите путь к фоновому звуку:
+    // (Если оставить пустым или сделать равным VIDEO_SRC, звук будет идти из самого видео.
+    // Если указать путь/ссылку на аудиофайл — звук видео заглушится, и заиграет этот трек).
+    const AUDIO_SRC = 'https:/cdn1.deliciousoranges.com/s1/get/music/20250822/QKooK_-_Specnaz_79529390.mp3'; 
+
+    // 3. Настройки прокси (Socks5)
+    const PROXY = {
+      ip:       '',   // e.g. '192.168.1.1'
+      port:     '',   // e.g. '8080'
+      login:    '',   // e.g. 'mylogin'
+      password: ''    // e.g. 'mypassword'
+    };
+
+    // ==========================================
+    // === ИНИЦИАЛИЗАЦИЯ ВИДЕО И ЗВУКА ===
+    // ==========================================
+    const bgVideo = document.getElementById('bg-video');
+    
+    // Динамически применяем видео из переменной VIDEO_SRC к тегу source и загружаем
+    if (bgVideo) {
+      const sourceElement = bgVideo.querySelector('source');
+      if (sourceElement) {
+        sourceElement.src = VIDEO_SRC;
+        bgVideo.load();
+      }
+    }
+
+    // Определяем, используется ли отдельный аудиофайл
+    const useSeparateAudio = AUDIO_SRC && AUDIO_SRC !== VIDEO_SRC;
+    let bgAudio = null;
+
+    if (useSeparateAudio) {
+      bgAudio = new Audio(AUDIO_SRC);
+      bgAudio.loop = true;
+      bgAudio.preload = 'auto';
+    }
+
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
 
@@ -1041,16 +1166,6 @@
       });
     }
 
-    // === PROXY PANEL ===
-
-    // To set values, edit these:
-    const PROXY = {
-      ip:       '',   // e.g. '192.168.1.1'
-      port:     '',   // e.g. '8080'
-      login:    '',   // e.g. 'mylogin'
-      password: ''    // e.g. 'mypassword'
-    };
-
     function applyProxy() {
       const fields = ['ip', 'port', 'login', 'password'];
       fields.forEach(key => {
@@ -1064,12 +1179,23 @@
 
     applyProxy();
 
+    // Обновлено под iFrame ограничения: используем execCommand как надежный резервный вариант
     function copyField(el) {
       if (el.classList.contains('empty')) return;
-      navigator.clipboard.writeText(el.textContent).then(() => {
+      const textToCopy = el.textContent;
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      textarea.style.position = 'fixed';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
         el.classList.add('copied');
         setTimeout(() => el.classList.remove('copied'), 1500);
-      });
+      } catch (err) {
+        console.warn('Unable to copy', err);
+      }
+      document.body.removeChild(textarea);
     }
 
     function toggleProxy() {
@@ -1095,10 +1221,27 @@
     }
 
     // === AUDIO CONTROLS ===
-    const bgVideo = document.getElementById('bg-video');
     const mainCard = document.getElementById('mainCard');
     const soundBtn = document.getElementById('soundToggleBtn');
-    const soundLabel = document.getElementById('soundToggleLabel');
+    const volumeSlider = document.getElementById('volumeSlider');
+    let lastActiveVolume = 0.5;
+
+    function applyVolumeToSources(volume) {
+      if (useSeparateAudio) {
+        // Заглушаем само видео
+        bgVideo.volume = 0;
+        bgVideo.muted = true;
+        // Управляем отдельным звуком
+        if (bgAudio) {
+          bgAudio.volume = volume;
+          bgAudio.muted = (volume === 0);
+        }
+      } else {
+        // Управляем звуком внутри видео
+        bgVideo.volume = volume;
+        bgVideo.muted = (volume === 0);
+      }
+    }
 
     function enterSite() {
       const overlay = document.getElementById('intro-overlay');
@@ -1109,36 +1252,73 @@
       mainCard.classList.remove('content-blur-state');
       mainCard.classList.add('content-ready-state');
 
-      // Unmute and play video
-      bgVideo.muted = false;
-      bgVideo.play().then(() => {
-        updateSoundButtonUI(false);
-      }).catch((err) => {
-        console.log("Autoplay was prevented by browser, keeping muted:", err);
-        bgVideo.muted = true;
-        updateSoundButtonUI(true);
-      });
-    }
+      // Инициализируем громкость из текущего значения ползунка
+      const initialVol = parseFloat(volumeSlider.value);
+      applyVolumeToSources(initialVol);
 
-    function toggleSound() {
-      if (bgVideo.muted) {
-        bgVideo.muted = false;
-        // If the video was paused for some reason, resume it
-        bgVideo.play().catch(() => {});
-        updateSoundButtonUI(false);
-      } else {
-        bgVideo.muted = true;
-        updateSoundButtonUI(true);
+      // Запускаем видео
+      bgVideo.play().then(() => {
+        updateSoundUI(initialVol);
+      }).catch((err) => {
+        console.log("Autoplay blocked by browser for video.", err);
+      });
+
+      // Запускаем звук (если аудио раздельное)
+      if (useSeparateAudio && bgAudio) {
+        bgAudio.play().then(() => {
+          updateSoundUI(initialVol);
+        }).catch((err) => {
+          console.log("Autoplay blocked by browser for separate audio. Audio muted.", err);
+          applyVolumeToSources(0);
+          updateSoundUI(0);
+        });
       }
     }
 
-    function updateSoundButtonUI(isMuted) {
-      if (isMuted) {
-        soundBtn.firstChild.textContent = '🔇 ';
-        soundLabel.textContent = 'Звук: Выкл';
+    function changeVolume(val) {
+      const volume = parseFloat(val);
+      applyVolumeToSources(volume);
+      
+      if (volume > 0) {
+        // Пробуем запустить воспроизведение, если оно было приостановлено браузером
+        bgVideo.play().catch(() => {});
+        if (useSeparateAudio && bgAudio) {
+          bgAudio.play().catch(() => {});
+        }
+        lastActiveVolume = volume;
+      }
+      updateSoundUI(volume);
+    }
+
+    function toggleMute() {
+      const currentVolume = useSeparateAudio ? (bgAudio ? bgAudio.volume : 0) : bgVideo.volume;
+
+      if (currentVolume > 0) {
+        lastActiveVolume = currentVolume;
+        applyVolumeToSources(0);
+        volumeSlider.value = 0;
+        updateSoundUI(0);
       } else {
-        soundBtn.firstChild.textContent = '🔊 ';
-        soundLabel.textContent = 'Звук: Вкл';
+        applyVolumeToSources(lastActiveVolume);
+        volumeSlider.value = lastActiveVolume;
+        
+        bgVideo.play().catch(() => {});
+        if (useSeparateAudio && bgAudio) {
+          bgAudio.play().catch(() => {});
+        }
+        updateSoundUI(lastActiveVolume);
+      }
+    }
+
+    function updateSoundUI(volume) {
+      if (volume === 0) {
+        soundBtn.textContent = '🔇';
+      } else if (volume < 0.4) {
+        soundBtn.textContent = '🔈';
+      } else if (volume < 0.7) {
+        soundBtn.textContent = '🔉';
+      } else {
+        soundBtn.textContent = '🔊';
       }
     }
   </script>
