@@ -50,6 +50,7 @@
       object-fit: cover;
       z-index: -3;
       filter: brightness(0.55) saturate(1.1);
+      transition: filter 1s ease;
     }
 
     .video-overlay {
@@ -63,46 +64,86 @@
       pointer-events: none;
     }
 
-    .sound-hint {
+    /* === INTRO OVERLAY (CLICK TO ENTER) === */
+    #intro-overlay {
       position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(36, 27, 8, 0.85);
-      border: 1px solid var(--border);
-      color: var(--accent);
-      font-size: 0.7rem;
-      padding: 0.5rem 0.9rem;
-      border-radius: 999px;
-      z-index: 5;
-      pointer-events: none;
-      opacity: 1;
-      transition: opacity 0.4s ease;
-      white-space: nowrap;
-      backdrop-filter: blur(4px);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(20, 15, 4, 0.96);
+      z-index: 9999; /* Самый высокий приоритет отображения */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
-    .sound-hint.hidden {
+    #intro-overlay.fade-out {
       opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    @media (max-width: 480px) {
-      .sound-hint {
-        font-size: 0.62rem;
-        padding: 0.45rem 0.75rem;
-        white-space: normal;
-        text-align: center;
-        max-width: 90%;
-      }
+    .intro-btn {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(36, 27, 8, 0.8);
+      border: 2px dashed var(--border);
+      padding: 1.5rem 3rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(255, 213, 79, 0.15);
+      animation: pulse 2s infinite ease-in-out;
+      text-align: center;
+      user-select: none;
     }
 
-    /* === CARD TOGGLE BUTTON === */
-    .card-toggle-btn {
+    .intro-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255, 213, 79, 0.15);
+      box-shadow: 0 0 40px rgba(255, 213, 79, 0.3);
+      transform: scale(1.05);
+    }
+
+    .intro-hint {
+      margin-top: 1.2rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 213, 79, 0.1); }
+      50% { transform: scale(1.03); box-shadow: 0 0 45px rgba(255, 213, 79, 0.25); }
+    }
+
+    /* === CONTROLS CONTAINER === */
+    .controls-container {
       position: fixed;
       top: 1rem;
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    /* === BUTTONS (CARD TOGGLE & MUTE TOGGLE) === */
+    .card-toggle-btn, .mute-toggle-btn {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--accent);
@@ -119,23 +160,28 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .card-toggle-btn:hover {
+    .card-toggle-btn:hover, .mute-toggle-btn:hover {
       border-color: var(--accent);
       background: rgba(255, 213, 79, 0.08);
     }
 
-    .card-toggle-btn:active {
-      transform: translateX(-50%) scale(0.96);
+    .card-toggle-btn:active, .mute-toggle-btn:active {
+      transform: scale(0.96);
     }
 
     @media (max-width: 480px) {
-      .card-toggle-btn {
+      .controls-container {
         top: 0.75rem;
+        width: calc(100% - 1.5rem);
+        justify-content: center;
+      }
+      .card-toggle-btn, .mute-toggle-btn {
         font-size: 0.68rem;
-        padding: 0.45rem 0.9rem;
+        padding: 0.45rem 0.8rem;
       }
     }
 
+    /* === MAIN CARD === */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -149,7 +195,18 @@
       animation: cardPop 0.8s ease;
       z-index: 1;
       /* Smooth touch transition instead of mouse parallax */
-      transition: transform 0.2s ease-out, opacity 0.25s ease;
+      transition: transform 0.2s ease-out, opacity 0.25s ease, filter 1s ease;
+    }
+
+    /* Скрываем контент размытием до захода на сайт */
+    .content-blur-state {
+      filter: blur(15px);
+      pointer-events: none;
+    }
+
+    .content-ready-state {
+      filter: none;
+      pointer-events: auto;
     }
 
     .card.card-hidden {
@@ -436,7 +493,7 @@
       body {
         padding: 1rem 0.75rem;
         align-items: flex-start;
-        padding-top: 1.5rem;
+        padding-top: 4.5rem; /* Сдвигаем вниз из-за фиксированных кнопок */
         padding-bottom: 2rem;
       }
 
@@ -469,7 +526,7 @@
     /* Tablets (481–768px) */
     @media (min-width: 481px) and (max-width: 768px) {
       body {
-        padding: 2rem 1.5rem;
+        padding: 2.5rem 1.5rem;
       }
 
       .card {
@@ -481,7 +538,7 @@
     /* Landscape mobile */
     @media (max-height: 600px) and (orientation: landscape) {
       body {
-        padding: 1rem;
+        padding: 4rem 1rem 1rem 1rem;
         align-items: flex-start;
       }
 
@@ -518,8 +575,6 @@
       .link-item {
         padding: 0.65rem 0.85rem;
       }
-
-      /* Reduce particles on landscape to keep perf */
     }
 
     /* Reduce motion for users who prefer it */
@@ -751,17 +806,28 @@
 </head>
 <body>
 
+  <!-- Click to Enter Screen -->
+  <div id="intro-overlay" onclick="enterSite()">
+    <div class="intro-btn">
+      Click to Enter...
+    </div>
+  </div>
+
   <!-- Background video -->
-  <video id="bg-video" autoplay muted loop playsinline preload="auto">
+  <video id="bg-video" class="content-blur-state" muted loop playsinline preload="auto">
     <source src="Sources/MyVideo.mp4" type="video/mp4">
   </video>
   <div class="video-overlay"></div>
-  <div id="sound-hint" class="sound-hint">🔇 Нажмите в любом месте, чтобы включить звук</div>
 
-  <!-- CARD TOGGLE BUTTON -->
-  <button id="cardToggleBtn" class="card-toggle-btn" onclick="toggleCard()">
-    🙈 <span id="cardToggleLabel">Скрыть карточку</span>
-  </button>
+  <!-- CONTROLS -->
+  <div class="controls-container">
+    <button id="cardToggleBtn" class="card-toggle-btn" onclick="toggleCard()">
+      🙈 <span id="cardToggleLabel">Скрыть карточку</span>
+    </button>
+    <button id="soundToggleBtn" class="mute-toggle-btn" onclick="toggleSound()">
+      🔇 <span id="soundToggleLabel">Звук: Выкл</span>
+    </button>
+  </div>
 
   <div class="layout">
     
@@ -797,7 +863,7 @@
   </div> -->
 
   <!-- MAIN CARD -->
-  <div class="card" id="mainCard">
+  <div class="card content-blur-state" id="mainCard">
 
     <div class="avatar-wrap">
       <img src="Sources/avatar.jpg" alt="ProgrammDuck avatar" />
@@ -1028,31 +1094,53 @@
       }
     }
 
-    // === Unmute background video on first user interaction ===
-    (function() {
-      const bgVideo = document.getElementById('bg-video');
-      const hint = document.getElementById('sound-hint');
-      let unmuted = false;
+    // === AUDIO CONTROLS ===
+    const bgVideo = document.getElementById('bg-video');
+    const mainCard = document.getElementById('mainCard');
+    const soundBtn = document.getElementById('soundToggleBtn');
+    const soundLabel = document.getElementById('soundToggleLabel');
 
-      function unmuteVideo() {
-        if (unmuted) return;
-        unmuted = true;
+    function enterSite() {
+      const overlay = document.getElementById('intro-overlay');
+      overlay.classList.add('fade-out');
+      
+      // Снимаем блюр с видео и карточки при входе
+      bgVideo.classList.remove('content-blur-state');
+      mainCard.classList.remove('content-blur-state');
+      mainCard.classList.add('content-ready-state');
+
+      // Unmute and play video
+      bgVideo.muted = false;
+      bgVideo.play().then(() => {
+        updateSoundButtonUI(false);
+      }).catch((err) => {
+        console.log("Autoplay was prevented by browser, keeping muted:", err);
+        bgVideo.muted = true;
+        updateSoundButtonUI(true);
+      });
+    }
+
+    function toggleSound() {
+      if (bgVideo.muted) {
         bgVideo.muted = false;
-        bgVideo.play().catch(() => {
-          // If play() is rejected for some reason, re-mute so it can keep autoplaying
-          bgVideo.muted = true;
-          unmuted = false;
-        });
-        if (hint) hint.classList.add('hidden');
-        document.removeEventListener('click', unmuteVideo);
-        document.removeEventListener('touchstart', unmuteVideo);
-        document.removeEventListener('keydown', unmuteVideo);
+        // If the video was paused for some reason, resume it
+        bgVideo.play().catch(() => {});
+        updateSoundButtonUI(false);
+      } else {
+        bgVideo.muted = true;
+        updateSoundButtonUI(true);
       }
+    }
 
-      document.addEventListener('click', unmuteVideo);
-      document.addEventListener('touchstart', unmuteVideo);
-      document.addEventListener('keydown', unmuteVideo);
-    })();
+    function updateSoundButtonUI(isMuted) {
+      if (isMuted) {
+        soundBtn.firstChild.textContent = '🔇 ';
+        soundLabel.textContent = 'Звук: Выкл';
+      } else {
+        soundBtn.firstChild.textContent = '🔊 ';
+        soundLabel.textContent = 'Звук: Вкл';
+      }
+    }
   </script>
 </body>
 </html>
