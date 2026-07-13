@@ -19,6 +19,18 @@
       --muted: #c6a94a;
     }
 
+    /* === CUSTOM CURSOR === */
+    html, body {
+      /* Добавлены координаты 16 16 перед запятой */
+      cursor: url('Sources/Cursor.png') 16 16, default;
+    }
+
+    /* Применяем кастомный курсор ко всем интерактивным элементам */
+    a, button, input, select, textarea, [role="button"], .tag, .proxy-value, .intro-btn, .mute-toggle-btn, .card-toggle-btn, #volumeSlider {
+      /* И сюда тоже */
+      cursor: url('Sources/Cursor.png') 16 16, pointer !important;
+    }
+
     body {
       background: #140f04; /* fallback while video loads */
       color: var(--text);
@@ -77,7 +89,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
       transition: opacity 0.6s ease, visibility 0.6s ease;
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
@@ -98,7 +109,6 @@
       border: 2px dashed var(--border);
       padding: 1.5rem 3rem;
       border-radius: 16px;
-      cursor: pointer;
       transition: all 0.3s ease;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -151,7 +161,6 @@
       font-size: 0.75rem;
       padding: 0.55rem 1.1rem;
       border-radius: 999px;
-      cursor: pointer;
       transition: 0.25s ease;
       display: flex;
       align-items: center;
@@ -186,7 +195,6 @@
       border: none;
       box-shadow: none;
       padding: 0;
-      cursor: pointer;
       font-size: 0.9rem;
       display: flex;
       align-items: center;
@@ -207,7 +215,6 @@
       background: var(--border);
       border-radius: 2px;
       outline: none;
-      cursor: pointer;
     }
 
     #volumeSlider::-webkit-slider-thumb {
@@ -217,7 +224,6 @@
       height: 12px;
       border-radius: 50%;
       background: var(--accent);
-      cursor: pointer;
       box-shadow: 0 0 8px rgba(255, 213, 79, 0.8);
       transition: transform 0.1s ease;
     }
@@ -232,13 +238,51 @@
       border: none;
       border-radius: 50%;
       background: var(--accent);
-      cursor: pointer;
       box-shadow: 0 0 8px rgba(255, 213, 79, 0.8);
       transition: transform 0.1s ease;
     }
 
     #volumeSlider::-moz-range-thumb:hover {
       transform: scale(1.2);
+    }
+
+    /* === AUTHORSHIP TEMPLATES === */
+    .authorship-left, .authorship-right {
+      position: fixed;
+      top: 1.25rem;
+      font-size: 0.65rem;
+      color: var(--muted);
+      opacity: 0.5;
+      transition: opacity 0.3s ease, color 0.3s ease;
+      z-index: 25;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      user-select: none;
+    }
+
+    .authorship-left {
+      left: 1.5rem;
+    }
+
+    .authorship-right {
+      right: 1.5rem;
+    }
+
+    .authorship-left:hover, .authorship-right:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .authorship-link {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 0.2s;
+    }
+
+    .authorship-link:hover {
+      border-color: var(--accent);
     }
 
     @media (max-width: 480px) {
@@ -486,7 +530,7 @@
       color: var(--border);
     }
 
-    /* === Animated Background glow blobs (kept above video, below content) === */
+    /* === Animated Background glow blobs === */
     body::before,
     body::after {
       content: '';
@@ -574,7 +618,7 @@
         padding: 1rem 0.75rem;
         align-items: flex-start;
         padding-top: 4.5rem; /* Сдвигаем вниз из-за фиксированных кнопок */
-        padding-bottom: 2rem;
+        padding-bottom: 3.5rem; /* Место для авторства внизу */
       }
 
       .card {
@@ -600,6 +644,19 @@
       /* Disable parallax on mobile (handled in JS too) */
       .card {
         transform: none !important;
+      }
+
+      /* Переносим авторство вниз, чтобы не мешать кнопкам управления на мобилках */
+      .authorship-left, .authorship-right {
+        top: auto;
+        bottom: 1rem;
+        font-size: 0.6rem;
+      }
+      .authorship-left {
+        left: 1rem;
+      }
+      .authorship-right {
+        right: 1rem;
       }
     }
 
@@ -747,7 +804,6 @@
       color: #fff;
       word-break: break-all;
       transition: border-color 0.2s ease, background 0.2s ease;
-      cursor: default;
       user-select: all;
       position: relative;
       text-shadow: 0 0 6px rgba(255,255,255,0.15);
@@ -801,7 +857,6 @@
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.78rem;
-      cursor: pointer;
       text-align: left;
       margin-bottom: 0.6rem;
       align-items: center;
@@ -886,6 +941,14 @@
 </head>
 <body>
 
+  <!-- AUTHORSHIP CORNER LABELS -->
+  <div class="authorship-left">
+    <span>Design: <a href="https://github.com/ProgrammDuck" target="_blank" class="authorship-link">ProgrammDuck</a></span>
+  </div>
+  <div class="authorship-right">
+    <span>Cursor: <a href="https://www.flaticon.com/ru/free-icon/space_13706510?term=%D0%B7%D0%B2%D0%B5%D0%B7%D0%B4%D0%B0&page=1&position=6&origin=search&related_id=13706510" target="_blank" class="authorship-link">flaticon.com</a></span>
+  </div>
+
   <!-- Click to Enter Screen -->
   <div id="intro-overlay" onclick="enterSite()">
     <div class="intro-btn">
@@ -914,37 +977,6 @@
 
   <div class="layout">
     
-  <!-- PROXY PANEL
-  <div class="proxy-panel">
-    <button class="proxy-toggle" id="proxyToggle" onclick="toggleProxy()">
-      🔒 <span class="toggle-label">Proxy</span>
-      <span class="proxy-toggle-icon">▼</span>
-    </button>
-    <div class="proxy-inner" id="proxyInner">
-      <div class="proxy-title">🔒 Proxy (Socks5)</div>
-
-      <div class="proxy-field">
-        <div class="proxy-label">IP Address</div>
-        <div class="proxy-value empty" id="proxy-ip" onclick="copyField(this)">87.106.81.95</div>
-      </div>
-      <div class="proxy-field">
-        <div class="proxy-label">Port</div>
-        <div class="proxy-value empty" id="proxy-port" onclick="copyField(this)">1081</div>
-      </div>
-
-      <hr class="proxy-divider" />
-
-      <div class="proxy-field">
-        <div class="proxy-label">Login</div>
-        <div class="proxy-value empty" id="proxy-login" onclick="copyField(this)">User</div>
-      </div>
-      <div class="proxy-field">
-        <div class="proxy-label">Password</div>
-        <div class="proxy-value empty" id="proxy-password" onclick="copyField(this)">khzj8ub9Eo62</div>
-      </div>
-    </div>
-  </div> -->
-
   <!-- MAIN CARD -->
   <div class="card content-blur-state" id="mainCard">
 
@@ -1044,21 +1076,17 @@
     // ==========================================
 
     // 1. Укажите путь к вашему фоновому видео:
-    //const VIDEO_SRC = 'https://r2.guns.lol/47592398-6ee9-4c8f-9331-6d6652924469.mp4'; 
     const VIDEO_SRC = 'Sources/MyVideo.mp4'; 
 
     // 2. Укажите путь к фоновому звуку:
-    // (Если оставить пустым или сделать равным VIDEO_SRC, звук будет идти из самого видео.
-    // Если указать путь/ссылку на аудиофайл — звук видео заглушится, и заиграет этот трек).
-    //const AUDIO_SRC = 'https://cdn1.deliciousoranges.com/s1/get/music/20250822/QKooK_-_Specnaz_79529390.mp3'; 
-    const AUDIO_SRC = ''
+    const AUDIO_SRC = '';
 
     // 3. Настройки прокси (Socks5)
     const PROXY = {
-      ip:       '',   // e.g. '192.168.1.1'
-      port:     '',   // e.g. '8080'
-      login:    '',   // e.g. 'mylogin'
-      password: ''    // e.g. 'mypassword'
+      ip:       '',   
+      port:     '',   
+      login:    '',   
+      password: ''    
     };
 
     // ==========================================
@@ -1066,7 +1094,6 @@
     // ==========================================
     const bgVideo = document.getElementById('bg-video');
     
-    // Динамически применяем видео из переменной VIDEO_SRC к тегу source и загружаем
     if (bgVideo) {
       const sourceElement = bgVideo.querySelector('source');
       if (sourceElement) {
@@ -1075,7 +1102,6 @@
       }
     }
 
-    // Определяем, используется ли отдельный аудиофайл
     const useSeparateAudio = AUDIO_SRC && AUDIO_SRC !== VIDEO_SRC;
     let bgAudio = null;
 
@@ -1090,7 +1116,6 @@
 
     let particlesArray = [];
 
-    // Detect mobile for performance tuning
     const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
     const numberOfParticles = isMobile ? 35 : 80;
 
@@ -1154,7 +1179,6 @@
         const x = (window.innerWidth / 2 - e.clientX) / 30;
         const y = (window.innerHeight / 2 - e.clientY) / 30;
         card.style.transform = `translate(${x}px, ${y}px)`;
-        // Proxy panel moves slightly slower for depth effect
         if (proxyPanel) proxyPanel.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
       });
     }
@@ -1183,7 +1207,6 @@
 
     applyProxy();
 
-    // Обновлено под iFrame ограничения: используем execCommand как надежный резервный вариант
     function copyField(el) {
       if (el.classList.contains('empty')) return;
       const textToCopy = el.textContent;
@@ -1209,7 +1232,7 @@
       inner.classList.toggle('open');
     }
 
-    // === CARD TOGGLE (show/hide card completely) ===
+    // === CARD TOGGLE ===
     function toggleCard() {
       const mainCard = document.getElementById('mainCard');
       const btn = document.getElementById('cardToggleBtn');
@@ -1232,16 +1255,13 @@
 
     function applyVolumeToSources(volume) {
       if (useSeparateAudio) {
-        // Заглушаем само видео
         bgVideo.volume = 0;
         bgVideo.muted = true;
-        // Управляем отдельным звуком
         if (bgAudio) {
           bgAudio.volume = volume;
           bgAudio.muted = (volume === 0);
         }
       } else {
-        // Управляем звуком внутри видео
         bgVideo.volume = volume;
         bgVideo.muted = (volume === 0);
       }
@@ -1251,23 +1271,19 @@
       const overlay = document.getElementById('intro-overlay');
       overlay.classList.add('fade-out');
       
-      // Снимаем блюр с видео и карточки при входе
       bgVideo.classList.remove('content-blur-state');
       mainCard.classList.remove('content-blur-state');
       mainCard.classList.add('content-ready-state');
 
-      // Инициализируем громкость из текущего значения ползунка
       const initialVol = parseFloat(volumeSlider.value);
       applyVolumeToSources(initialVol);
 
-      // Запускаем видео
       bgVideo.play().then(() => {
         updateSoundUI(initialVol);
       }).catch((err) => {
         console.log("Autoplay blocked by browser for video.", err);
       });
 
-      // Запускаем звук (если аудио раздельное)
       if (useSeparateAudio && bgAudio) {
         bgAudio.play().then(() => {
           updateSoundUI(initialVol);
@@ -1284,7 +1300,6 @@
       applyVolumeToSources(volume);
       
       if (volume > 0) {
-        // Пробуем запустить воспроизведение, если оно было приостановлено браузером
         bgVideo.play().catch(() => {});
         if (useSeparateAudio && bgAudio) {
           bgAudio.play().catch(() => {});
