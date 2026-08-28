@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
@@ -18,6 +18,7 @@
       --accent-strong: #ffb300;
       --text: #fff8e1;
       --muted: #c6a94a;
+      --spotify-green: #1db954;
     }
 
     /* === CUSTOM CURSOR === */
@@ -40,7 +41,6 @@
       align-items: center;
       justify-content: center;
       padding: 5.5rem 1rem 3rem 1rem;
-      gap: 1.5rem; /* Gap between three-column grid and bottom phrase card */
       animation: fadeIn 1s ease;
       overflow-x: hidden;
       position: relative;
@@ -124,22 +124,12 @@
       transform: scale(1.05);
     }
 
-    .intro-hint {
-      margin-top: 1.2rem;
-      font-size: 0.75rem;
-      color: var(--muted);
-      letter-spacing: 1px;
-      opacity: 0.8;
-      text-transform: uppercase;
-      user-select: none;
-    }
-
     @keyframes pulse {
       0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 213, 79, 0.1); }
       50% { transform: scale(1.03); box-shadow: 0 0 45px rgba(255, 213, 79, 0.25); }
     }
 
-    /* === STREAMING_CHUNK: Styling the controls container and audio interface... === */
+    /* === CONTROLS === */
     .controls-container {
       position: fixed;
       top: 1.25rem;
@@ -275,8 +265,6 @@
 
     .authorship-link:hover { border-color: var(--accent); }
 
-    /* === STREAMING_CHUNK: Constructing the layout columns & general cards with CSS flexbox order... === */
-    /* === MULTI-COLUMN LAYOUT === */
     .layout {
       display: flex;
       flex-direction: row;
@@ -286,14 +274,29 @@
       gap: 1.5rem;
       z-index: 1;
       width: 100%;
-      max-width: 1240px;
+      max-width: 1180px;
       margin: 0 auto;
       position: relative;
-      /* Плавный переход при скрытии/показе */
       transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 1s ease;
     }
 
-    /* Скрываем контент размытием до захода на сайт */
+    .layout-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .col-left, .col-right {
+      flex: 1 1 320px;
+      max-width: 340px;
+    }
+
+    .col-center {
+      flex: 1.2 1 360px;
+      max-width: 400px;
+    }
+
     .content-blur-state {
       filter: blur(15px);
       pointer-events: none;
@@ -304,8 +307,7 @@
       pointer-events: auto;
     }
 
-    /* Анимация скрытия всего макета */
-    .layout.layout-hidden, .bottom-container.layout-hidden {
+    .layout.layout-hidden {
       opacity: 0;
       transform: scale(0.9) translateY(20px) !important;
       pointer-events: none;
@@ -319,28 +321,10 @@
       padding: 2.2rem 1.8rem;
       position: relative;
       overflow: hidden;
+      width: 100%;
       box-shadow: 0 0 40px rgba(255, 193, 7, 0.12);
       animation: cardPop 0.8s ease;
       transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-    }
-
-    /* Располагаем основную карточку посередине на десктопе с помощью flex order */
-    #socialCard {
-      flex: 1 1 340px;
-      max-width: 380px;
-      order: 1;
-    }
-
-    #mainCard {
-      flex: 1.2 1 420px;
-      max-width: 440px;
-      order: 2;
-    }
-
-    #platformsCard {
-      flex: 1 1 340px;
-      max-width: 380px;
-      order: 3;
     }
 
     @keyframes cardPop {
@@ -348,7 +332,6 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    /* Заголовки для вынесенных колонок */
     .card-header-title {
       font-family: 'Syne', sans-serif;
       font-size: 1.15rem;
@@ -385,10 +368,6 @@
       transform: rotate(5deg) scale(1.05);
     }
 
-    .avatar-wrap img:active {
-      transform: scale(0.95);
-    }
-
     .name {
       font-family: 'Syne', sans-serif;
       font-size: 1.6rem;
@@ -407,14 +386,7 @@
       transition: opacity 0.2s ease;
     }
 
-    .email-link:hover {
-      opacity: 0.7;
-      text-decoration: underline;
-    }
-
-    .email-link:active {
-      opacity: 0.5;
-    }
+    .email-link:hover { opacity: 0.7; text-decoration: underline; }
 
     .bio {
       font-size: 0.8rem;
@@ -424,8 +396,6 @@
       line-height: 1.6;
     }
 
-    /* === STREAMING_CHUNK: Styling layout badges, tag lists and link items... === */
-    /* === ABOUT ME BADGE === */
     .about-badge {
       background: linear-gradient(135deg, rgba(255,213,79,0.08) 0%, rgba(255,213,79,0.01) 100%);
       border: 1px solid rgba(255, 213, 79, 0.15);
@@ -435,13 +405,12 @@
       margin: 1.5rem 0;
       position: relative;
       text-align: left;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .about-badge:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(255, 213, 79, 0.12);
-      border-color: rgba(255, 213, 79, 0.3);
     }
 
     .about-badge-title {
@@ -481,19 +450,12 @@
       border-radius: 999px;
       text-transform: uppercase;
       transition: 0.3s ease;
-      -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
 
     .tag:hover {
       background: var(--accent);
       color: #000;
-    }
-
-    .tag:active {
-      background: var(--accent);
-      color: #000;
-      transform: scale(0.95);
     }
 
     .section-title {
@@ -524,8 +486,6 @@
       transition: 0.25s ease;
       position: relative;
       overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
     }
 
     .link-item::before {
@@ -539,19 +499,11 @@
       transition: 0.5s;
     }
 
-    .link-item:hover::before {
-      left: 100%;
-    }
+    .link-item:hover::before { left: 100%; }
 
     .link-item:hover {
       border-color: var(--accent);
       transform: translateX(6px);
-    }
-
-    .link-item:active {
-      border-color: var(--accent);
-      background: rgba(255, 213, 79, 0.08);
-      transform: scale(0.98);
     }
 
     .link-item img {
@@ -570,13 +522,8 @@
       word-break: break-all;
     }
 
-    .donate {
-      border-color: var(--accent-strong);
-    }
-
-    .donate:hover {
-      background: rgba(255,179,0,0.1);
-    }
+    .donate { border-color: var(--accent-strong); }
+    .donate:hover { background: rgba(255,179,0,0.1); }
 
     .footer {
       margin-top: 1.5rem;
@@ -585,54 +532,225 @@
       color: var(--border);
     }
 
-    /* === STREAMING_CHUNK: Styling the new bottom phrase card... === */
-    /* === BOTTOM PHRASE CARD & CONTAINER === */
-    .bottom-container {
-      width: 100%;
-      max-width: 1240px;
-      margin: 0 auto;
-      z-index: 1;
-      position: relative;
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 1s ease;
-    }
-
-    #phraseCard {
-      width: 100%;
-      text-align: center;
-      padding: 2.2rem 2rem;
+    /* === QUOTES CARD STYLES === */
+    .quote-card-body {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      text-align: center;
+      position: relative;
+      padding: 0.5rem 0.2rem 0;
     }
 
     .quote-icon {
       font-family: 'Syne', sans-serif;
-      font-size: 3rem;
+      font-size: 2.5rem;
       line-height: 1;
       color: var(--accent);
-      opacity: 0.25;
-      margin-bottom: -0.3rem;
+      opacity: 0.3;
+      margin-bottom: -0.2rem;
       user-select: none;
       text-shadow: 0 0 10px rgba(255, 213, 79, 0.3);
     }
 
     .quote-text {
-      font-size: 1.1rem;
-      line-height: 1.6;
+      font-size: 0.88rem;
+      line-height: 1.55;
       color: var(--text);
       font-weight: 400;
-      max-width: 850px;
       margin-bottom: 0.8rem;
       font-style: italic;
     }
 
     .quote-author {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       font-style: normal;
+    }
+
+    /* === SPOTIFY CARD CUSTOM STYLES === */
+    .spotify-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.1rem;
+    }
+
+    .spotify-album-cover-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .spotify-album-cover-wrap.is-playing {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(255, 213, 79, 0.3);
+    }
+
+    .spotify-album-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .spotify-card-content:hover .spotify-album-cover {
+      transform: scale(1.05);
+    }
+
+    /* Equalizer animation overlay */
+    .spotify-eq-overlay {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(20, 15, 4, 0.85);
+      backdrop-filter: blur(4px);
+      padding: 6px 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 22px;
+      border: 1px solid rgba(255, 213, 79, 0.2);
+    }
+
+    .eq-bar {
+      width: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      height: 4px;
+    }
+
+    .is-playing .eq-bar-1 { animation: eqBounce 0.8s infinite ease-in-out alternate; }
+    .is-playing .eq-bar-2 { animation: eqBounce 1.1s infinite ease-in-out alternate 0.2s; }
+    .is-playing .eq-bar-3 { animation: eqBounce 0.9s infinite ease-in-out alternate 0.4s; }
+
+    @keyframes eqBounce {
+      0% { height: 4px; }
+      100% { height: 16px; }
+    }
+
+    .spotify-info {
+      width: 100%;
+    }
+
+    .spotify-song-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .spotify-artist {
+      font-size: 0.75rem;
+      color: var(--text);
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
+    }
+
+    .spotify-album {
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .spotify-progress-container {
+      width: 100%;
+      margin-top: 0.4rem;
+    }
+
+    .spotify-progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 213, 79, 0.15);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .spotify-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--muted), var(--accent));
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.4s linear;
+    }
+
+    .spotify-timestamps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Offline / Idle state styling */
+    .spotify-idle-state {
+      padding: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .spotify-idle-icon {
+      font-size: 2rem;
+      opacity: 0.4;
+      animation: idlePulse 3s infinite ease-in-out;
+    }
+
+    @keyframes idlePulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.08); opacity: 0.6; }
+    }
+
+    .spotify-idle-text {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .spotify-listen-btn {
+      margin-top: 0.4rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--accent);
+      background: rgba(255, 213, 79, 0.08);
+      color: var(--accent);
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 0.72rem;
+      font-weight: 700;
+      transition: all 0.25s ease;
+    }
+
+    .spotify-listen-btn:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 213, 79, 0.3);
     }
 
     /* === Animated Background glow blobs === */
@@ -649,16 +767,8 @@
       animation: float 18s infinite alternate ease-in-out;
     }
 
-    body::before {
-      top: -100px;
-      left: -100px;
-    }
-
-    body::after {
-      bottom: -120px;
-      right: -120px;
-      animation-delay: 4s;
-    }
+    body::before { top: -100px; left: -100px; }
+    body::after { bottom: -120px; right: -120px; animation-delay: 4s; }
 
     @keyframes float {
       0% { transform: translate(0, 0) scale(1); }
@@ -666,7 +776,6 @@
       100% { transform: translate(-60px, -40px) scale(0.95); }
     }
 
-    /* === Canvas particles === */
     #particles {
       position: fixed;
       top: 0;
@@ -677,84 +786,53 @@
       pointer-events: none;
     }
 
-    /* =======================================
-       STREAMING_CHUNK: Adding mobile responsive layouts and tablet media queries...
-       ======================================= */
-    
-    /* Средние экраны и Планшеты (1024px - 1100px) */
-    @media (max-width: 1100px) {
+    @media (max-width: 1100px) and (min-width: 769px) {
       .layout {
         flex-wrap: wrap;
-        max-width: 840px;
-        justify-content: center;
-      }
-
-      .bottom-container {
-        max-width: 840px;
+        max-width: 850px;
       }
       
-      #mainCard {
+      .col-center {
         flex: 1 1 100%;
         max-width: 100%;
-        order: 1; /* На средних экранах главная карточка идет первой сверху */
+        order: 1;
       }
 
-      #socialCard {
+      .col-left {
         flex: 1 1 calc(50% - 0.75rem);
         max-width: calc(50% - 0.75rem);
         order: 2;
       }
 
-      #platformsCard {
+      .col-right {
         flex: 1 1 calc(50% - 0.75rem);
         max-width: calc(50% - 0.75rem);
         order: 3;
       }
     }
 
-    /* Стандартный мобильный вид (max-width: 768px) */
     @media (max-width: 768px) {
       body {
-        padding: 5rem 0.75rem 5rem 0.75rem;
+        padding: 5rem 0.75rem 4rem 0.75rem;
         align-items: flex-start;
-        gap: 1.25rem;
-      }
-
-      .layout, .bottom-container {
-        max-width: 440px;
       }
 
       .layout {
+        max-width: 440px;
         flex-direction: column;
         align-items: center;
         gap: 1.25rem;
       }
 
-      #mainCard, #socialCard, #platformsCard {
+      .col-left, .col-center, .col-right {
         flex: 1 1 100%;
         width: 100%;
         max-width: 100%;
       }
 
-      #mainCard {
-        order: 1;
-      }
-
-      #socialCard {
-        order: 2;
-      }
-
-      #platformsCard {
-        order: 3;
-      }
-
-      #phraseCard {
-        padding: 1.8rem 1.5rem;
-      }
-
-      .quote-text {
-        font-size: 0.95rem;
-      }
+      .col-center { order: 1; }
+      .col-left { order: 2; }
+      .col-right { order: 3; }
 
       .controls-container {
         top: 0.75rem;
@@ -767,104 +845,27 @@
         padding: 0.45rem 0.8rem;
       }
 
-      .volume-container {
-        padding: 0.35rem 0.7rem;
-      }
+      .volume-container { padding: 0.35rem 0.7rem; }
+      #volumeSlider { width: 60px; }
 
-      #volumeSlider {
-        width: 60px;
-      }
-
-      .link-item {
-        padding: 0.9rem 1rem;
-        gap: 0.65rem;
-      }
-
-      .link-item:hover {
-        transform: none;
-      }
-
-      .link-item:active {
-        transform: scale(0.98);
-      }
-
-      /* Отключаем параллакс перемещения на смартфонах */
-      .card {
-        transform: none !important;
-      }
+      .link-item { padding: 0.9rem 1rem; gap: 0.65rem; }
+      .link-item:hover { transform: none; }
+      .card { transform: none !important; }
 
       .authorship-left, .authorship-right {
         top: auto;
         bottom: 1rem;
         font-size: 0.6rem;
       }
-
       .authorship-left { left: 1rem; }
       .authorship-right { right: 1rem; }
     }
 
-    /* Маленькие телефоны (< 360px) */
     @media (max-width: 359px) {
-      .card {
-        padding: 1.75rem 1.25rem;
-        border-radius: 16px;
-      }
-
+      .card { padding: 1.75rem 1.25rem; border-radius: 16px; }
       .name { font-size: 1.35rem; }
       .avatar-wrap img { width: 80px; height: 80px; }
-
-      .link-item {
-        font-size: 0.76rem;
-        padding: 0.75rem 0.85rem;
-        gap: 0.6rem;
-      }
-
-      .link-handle { font-size: 0.65rem; }
-      .tags { gap: 0.35rem; }
-      .tag { font-size: 0.62rem; padding: 0.2rem 0.5rem; }
-      .about-badge { padding: 1rem; }
-      #phraseCard { padding: 1.5rem 1.1rem; }
-      .quote-text { font-size: 0.85rem; }
-    }
-
-    /* Пейзажный (альбомный) режим на смартфонах */
-    @media (max-height: 600px) and (orientation: landscape) {
-      body {
-        padding: 5rem 1rem 1rem 1rem;
-        align-items: flex-start;
-      }
-
-      .layout, .bottom-container {
-        max-width: 440px;
-      }
-
-      .layout {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .card {
-        padding: 1.5rem;
-      }
-
-      .avatar-wrap { margin-bottom: 0.75rem; }
-      .avatar-wrap img { width: 70px; height: 70px; }
-      .name { font-size: 1.3rem; }
-      .tags { margin: 0.75rem 0 1rem; }
-      .section-title { margin: 0.75rem 0 0.4rem; }
-      .links { gap: 0.45rem; }
-      .link-item { padding: 0.65rem 0.85rem; }
-    }
-
-    /* Reduce motion */
-    @media (prefers-reduced-motion: reduce) {
-      body, .card, .avatar-wrap img, .link-item, .tag, .about-badge {
-        animation: none !important;
-        transition: none !important;
-      }
-      body::before, body::after {
-        animation: none !important;
-      }
+      .link-item { font-size: 0.76rem; padding: 0.75rem 0.85rem; }
     }
   </style>
 </head>
@@ -905,156 +906,164 @@
 
   <div class="layout content-blur-state" id="layoutContainer">
     
-    <!-- ======================================= -->
-    <!-- COLUMN 1: MAIN MENU                     -->
-    <!-- ======================================= -->
-    <div class="card" id="mainCard">
+    <!-- COLUMN 1 (LEFT): SOCIAL & QUOTES -->
+    <div class="layout-col col-left">
+      <!-- SOCIAL CARD -->
+      <div class="card" id="socialCard">
+        <div class="card-header-title">💬 Social</div>
+        
+        <div class="links">
+          <a class="link-item" href="https://discord.com/users/ProgrammDuck" target="_blank" rel="noopener">
+            <img src="Sources/discord.png" alt="Discord" />
+            <span class="link-label">Discord</span>
+            <span class="link-handle">ProgrammDuck</span>
+          </a>
 
-      <div class="avatar-wrap">
-        <img src="Sources/avatar.jpg" alt="ProgrammDuck avatar" />
-      </div>
+          <a class="link-item" href="https://t.me/ProgrammDuck" target="_blank" rel="noopener">
+            <img src="Sources/telegram.png" alt="Telegram" />
+            <span class="link-label">Telegram</span>
+            <span class="link-handle">@ProgrammDuck</span>
+          </a>
 
-      <div class="name">Programm<span>Duck</span></div>
-      <div class="bio">
-        Hi! I'm Ilya.<br/>
-      </div>
+          <a class="link-item" href="https://steamcommunity.com/profiles/76561199568743099/" target="_blank" rel="noopener">
+            <img src="Sources/steam.png" alt="Steam" />
+            <span class="link-label">Steam</span>
+            <span class="link-handle">ProgrammDuck</span>
+          </a>
 
-      <div class="tags">
-        <span class="tag">Python</span>
-        <span class="tag">C#</span>
-        <span class="tag">Luau</span>
-        <span class="tag">Discord Bots</span>
-        <span class="tag">SysAdmin</span>
-      </div>
-
-      <!-- ABOUT ME BADGE -->
-      <div class="about-badge">
-        <div class="about-badge-title">
-          ✨ About me
-        </div>
-        <div class="about-badge-text">
-          Я увлекаюсь программированием. Моя основная ОС - Windows, второстепенная - Arch linux. Мой главный инструмент для организации информации - Obsidian.
-        </div>
-      </div>
-
-      <!-- SUPPORT SECTION -->
-      <div class="section-title">💛 Support</div>
-      <div class="links">
-        <a class="link-item donate" href="https://www.donationalerts.com/r/ProgrammDuck" target="_blank" rel="noopener">
-          <img src="Sources/DA.svg" alt="Donation" />
-          <span class="link-label">Donation</span>
-          <span class="link-handle">DonationAlerts</span>
-        </a>
-      </div>
-
-      <div class="footer">© ProgrammDuck - 2026</div>
-    </div><!-- /mainCard -->
-
-
-    <!-- ======================================= -->
-    <!-- COLUMN 2: SOCIAL                        -->
-    <!-- ======================================= -->
-    <div class="card" id="socialCard">
-      <div class="card-header-title">💬 Social</div>
-      
-      <div class="links">
-        <a class="link-item" href="https://discord.com/users/ProgrammDuck" target="_blank" rel="noopener">
-          <img src="Sources/discord.png" alt="Discord" />
-          <span class="link-label">Discord</span>
-          <span class="link-handle">ProgrammDuck</span>
-        </a>
-
-        <a class="link-item" href="https://t.me/ProgrammDuck" target="_blank" rel="noopener">
-          <img src="Sources/telegram.png" alt="Telegram" />
-          <span class="link-label">Telegram</span>
-          <span class="link-handle">@ProgrammDuck</span>
-        </a>
-
-        <a class="link-item" href="https://steamcommunity.com/profiles/76561199568743099/" target="_blank" rel="noopener">
-          <img src="Sources/steam.png" alt="Steam" />
-          <span class="link-label">Steam</span>
-          <span class="link-handle">ProgrammDuck</span>
-        </a>
-
-        <div class="link-item">
-          <img src="Sources/gmail.png" alt="Email" />
-          <span class="link-label">Email</span>
-          <span class="link-handle">
-            <a href="mailto:ProgrammDuck@yandex.ru" class="email-link">
-              ProgrammDuck@yandex.ru
-            </a><br>
-            <a href="mailto:ProgrammDuck@xyecoc.com" class="email-link">
-              ProgrammDuck@xyecoc.com
-            </a>
-          </span>
+          <div class="link-item">
+            <img src="Sources/gmail.png" alt="Email" />
+            <span class="link-label">Email</span>
+            <span class="link-handle">
+              <a href="mailto:ProgrammDuck@yandex.ru" class="email-link">
+                ProgrammDuck@yandex.ru
+              </a><br>
+              <a href="mailto:ProgrammDuck@xyecoc.com" class="email-link">
+                ProgrammDuck@xyecoc.com
+              </a>
+            </span>
+          </div>
         </div>
       </div>
-    </div><!-- /socialCard -->
 
-
-    <!-- ======================================= -->
-    <!-- COLUMN 3: PLATFORMS                     -->
-    <!-- ======================================= -->
-    <div class="card" id="platformsCard">
-      <div class="card-header-title">🌍 Platforms</div>
-      
-      <div class="links">
-        <a class="link-item" href="https://github.com/ProgrammDuck" target="_blank" rel="noopener">
-          <img src="Sources/github.svg" alt="GitHub" />
-          <span class="link-label">GitHub</span>
-          <span class="link-handle">ProgrammDuck</span>
-        </a>
-
-        <a class="link-item" href="@programmduck:matrix.org " target="_blank" rel="noopener">
-          <img src="Sources/matrix.png" alt="Matrix" />
-          <span class="link-label">Matrix</span>
-          <span class="link-handle">@programmduck:matrix.org</span>
-        </a>
-
-        <a class="link-item" href="https://www.youtube.com/@ProgrammDuck" target="_blank" rel="noopener">
-          <img src="Sources/Youtube.jpg" alt="YouTube" />
-          <span class="link-label">YouTube</span>
-          <span class="link-handle">@ProgrammDuck</span>
-        </a>
-
-        <a class="link-item" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi?si=9c97cd3726894dba" target="_blank" rel="noopener">
-          <img src="Sources/spotify.png" alt="Spotify" />
-          <span class="link-label">Spotify</span>
-          <span class="link-handle">ProgrammDuck</span>
-        </a>
+      <!-- QUOTES CARD (UNDER SOCIAL) -->
+      <div class="card" id="quotesCard">
+        <div class="card-header-title">💭 Quote</div>
+        <div class="quote-card-body">
+          <div class="quote-icon">“</div>
+          <blockquote class="quote-text">
+            "Суди о человеке больше по его вопросам, чем по его ответам."
+          </blockquote>
+          <cite class="quote-author">— Вольтер, французский философ</cite>
+        </div>
       </div>
-    </div><!-- /platformsCard -->
+    </div>
+
+    <!-- COLUMN 2 (CENTER): MAIN PROFILE -->
+    <div class="layout-col col-center">
+      <div class="card" id="mainCard">
+        <div class="avatar-wrap">
+          <img src="Sources/avatar.jpg" alt="ProgrammDuck avatar" />
+        </div>
+
+        <div class="name">Programm<span>Duck</span></div>
+        <div class="bio">
+          Hi! I'm Ilya.<br/>
+        </div>
+
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">C#</span>
+          <span class="tag">Luau</span>
+          <span class="tag">Discord Bots</span>
+          <span class="tag">SysAdmin</span>
+        </div>
+
+        <div class="about-badge">
+          <div class="about-badge-title">
+            ✨ About me
+          </div>
+          <div class="about-badge-text">
+            Я увлекаюсь программированием. Моя основная ОС - Windows, второстепенная - Arch linux. Мой главный инструмент для организации информации - Obsidian.
+          </div>
+        </div>
+
+        <div class="section-title">💛 Support</div>
+        <div class="links">
+          <a class="link-item donate" href="https://www.donationalerts.com/r/ProgrammDuck" target="_blank" rel="noopener">
+            <img src="Sources/DA.svg" alt="Donation" />
+            <span class="link-label">Donation</span>
+            <span class="link-handle">DonationAlerts</span>
+          </a>
+        </div>
+
+        <div class="footer">© ProgrammDuck - 2026</div>
+      </div>
+    </div>
+
+    <!-- COLUMN 3 (RIGHT): PLATFORMS & SPOTIFY MUSIC -->
+    <div class="layout-col col-right">
+      <!-- PLATFORMS CARD -->
+      <div class="card" id="platformsCard">
+        <div class="card-header-title">🌍 Platforms</div>
+        
+        <div class="links">
+          <a class="link-item" href="https://github.com/ProgrammDuck" target="_blank" rel="noopener">
+            <img src="Sources/github.svg" alt="GitHub" />
+            <span class="link-label">GitHub</span>
+            <span class="link-handle">ProgrammDuck</span>
+          </a>
+
+          <a class="link-item" href="@programmduck:matrix.org " target="_blank" rel="noopener">
+            <img src="Sources/matrix.png" alt="Matrix" />
+            <span class="link-label">Matrix</span>
+            <span class="link-handle">@programmduck:matrix.org</span>
+          </a>
+
+          <a class="link-item" href="https://www.youtube.com/@ProgrammDuck" target="_blank" rel="noopener">
+            <img src="Sources/Youtube.jpg" alt="YouTube" />
+            <span class="link-label">YouTube</span>
+            <span class="link-handle">@ProgrammDuck</span>
+          </a>
+
+          <a class="link-item" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi?si=9c97cd3726894dba" target="_blank" rel="noopener">
+            <img src="Sources/spotify.png" alt="Spotify" />
+            <span class="link-label">Spotify</span>
+            <span class="link-handle">ProgrammDuck</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- SPOTIFY NOW PLAYING CARD (UNDER PLATFORMS) -->
+      <div class="card" id="spotifyCard">
+        <div class="card-header-title">🎧 Listening to</div>
+
+        <div id="spotifyContent" class="spotify-card-content">
+          <!-- Content will be injected dynamically by JavaScript Lanyard API -->
+          <div class="spotify-idle-state">
+            <div class="spotify-idle-icon">🎵</div>
+            <div class="spotify-idle-text">Загрузка статуса Spotify...</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div><!-- /layoutContainer -->
-
-  <!-- ======================================= -->
-  <!-- BOTTOM SECTION: MY FAVORITE PHRASE      -->
-  <!-- ======================================= -->
-  <div class="bottom-container content-blur-state" id="bottomContainer">
-    <div class="card" id="phraseCard">
-      <div class="quote-icon">“</div>
-      
-      <!-- ==================================================== -->
-      <!-- РЕДАКТИРУЙТЕ ТЕКСТ ВАШЕЙ ФРАЗЫ И АВТОРА НИЖЕ 👇 -->
-      <!-- ==================================================== -->
-      <blockquote class="quote-text">
-        "Суди о человеке больше по его вопросам, чем по его ответам."
-      </blockquote>
-      <cite class="quote-author">— Вольтер, французский философ и писатель</cite>
-      <!-- ==================================================== -->
-      
-    </div>
-  </div>
 
   <canvas id="particles"></canvas>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-<!-- Подключаем Firebase SDK -->
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // КОНФИГУРАЦИЯ FIREBASE (Возьми из Firebase Console -> Project Settings)
+  // ====================================================
+  // 🟢 НАСТРОЙКА DISCORD ID ДЛЯ SPOTIFY LANYARD API:
+  // ====================================================
+  const DISCORD_USER_ID = "916019025945976842";
+
+  // КОНФИГУРАЦИЯ FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDmvhA6y0SF1CEZCqVXTZvlQ8EimHZI2yI",
     authDomain: "test-da9af.firebaseapp.com",
@@ -1065,7 +1074,6 @@
     appId: "1:279738673870:web:f247eb0ac7d092f265fe9f"
   };
 
-
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const siteRef = ref(db, 'siteState');
@@ -1073,7 +1081,6 @@
   // DOM ЭЛЕМЕНТЫ
   const bgVideo = document.getElementById('bg-video');
   const layoutContainer = document.getElementById('layoutContainer');
-  const bottomContainer = document.getElementById('bottomContainer');
   const soundBtn = document.getElementById('soundToggleBtn');
   const volumeSlider = document.getElementById('volumeSlider');
 
@@ -1086,10 +1093,107 @@
   let currentBgSource = ''; 
 
   // ==========================================
+  // === LANYARD SPOTIFY LIVE WIDGET LOGIC ===
+  // ==========================================
+  const spotifyContent = document.getElementById('spotifyContent');
+  let spotifyInterval = null;
+
+  function formatTime(ms) {
+    if (!ms || isNaN(ms)) return "0:00";
+    const totalSeconds = Math.floor(ms / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  async function updateSpotifyWidget() {
+    if (!spotifyContent) return;
+
+    if (!DISCORD_USER_ID || DISCORD_USER_ID === "ВАШ_DISCORD_ID_ЗДЕСЬ") {
+      spotifyContent.innerHTML = `
+        <div class="spotify-idle-state">
+          <div class="spotify-idle-icon">🎧</div>
+          <div class="spotify-idle-text">Укажите ваш <b>Discord User ID</b> в файле для трансляции Spotify!</div>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+      const data = await response.json();
+
+      if (data && data.success && data.data && data.data.listening_to_spotify) {
+        const spotify = data.data.spotify;
+        const start = spotify.timestamps.start;
+        const end = spotify.timestamps.end;
+        const duration = end - start;
+        const elapsed = Math.max(0, Date.now() - start);
+        const progressPercent = Math.min(100, Math.max(0, (elapsed / duration) * 100));
+
+        const songUrl = `https://open.spotify.com/track/${spotify.track_id}`;
+
+        spotifyContent.innerHTML = `
+          <div class="spotify-album-cover-wrap is-playing">
+            <img class="spotify-album-cover" src="${spotify.album_art_url}" alt="${spotify.album}" />
+            <div class="spotify-eq-overlay">
+              <div class="eq-bar eq-bar-1"></div>
+              <div class="eq-bar eq-bar-2"></div>
+              <div class="eq-bar eq-bar-3"></div>
+            </div>
+          </div>
+
+          <div class="spotify-info">
+            <div class="spotify-song-title" title="${spotify.song}">${spotify.song}</div>
+            <div class="spotify-artist" title="${spotify.artist}">${spotify.artist}</div>
+            <div class="spotify-album" title="${spotify.album}">${spotify.album}</div>
+
+            <div class="spotify-progress-container">
+              <div class="spotify-progress-bar">
+                <div class="spotify-progress-fill" style="width: ${progressPercent}%;"></div>
+              </div>
+              <div class="spotify-timestamps">
+                <span>${formatTime(elapsed)}</span>
+                <span>${formatTime(duration)}</span>
+              </div>
+            </div>
+          </div>
+
+          <a class="spotify-listen-btn" href="${songUrl}" target="_blank" rel="noopener">
+            <img src="Sources/spotify.png" alt="Spotify" width="16" height="16" />
+            Слушать в Spotify
+          </a>
+        `;
+      } else {
+        spotifyContent.innerHTML = `
+          <div class="spotify-idle-state">
+            <div class="spotify-idle-icon">💤</div>
+            <div class="spotify-idle-text">Сейчас ничего не играет</div>
+          </div>
+          <a class="spotify-listen-btn" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi" target="_blank" rel="noopener">
+            <img src="Sources/spotify.png" alt="Spotify" width="16" height="16" />
+            Профиль Spotify
+          </a>
+        `;
+      }
+    } catch (err) {
+      console.log("Spotify Lanyard Fetch Error:", err);
+      spotifyContent.innerHTML = `
+        <div class="spotify-idle-state">
+          <div class="spotify-idle-icon">📻</div>
+          <div class="spotify-idle-text">Не удалось загрузить данные Spotify</div>
+        </div>
+      `;
+    }
+  }
+
+  updateSpotifyWidget();
+  spotifyInterval = setInterval(updateSpotifyWidget, 3000);
+
+  // ==========================================
   // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (YOUTUBE И ФАЙЛЫ) ===
   // ==========================================
 
-  // Вспомогательная функция для парсинга YouTube URL
   function parseYouTubeUrl(url) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url ? url.match(regExp) : null;
@@ -1104,7 +1208,6 @@
     return null;
   }
 
-  // Загрузка IFrame API для YouTube при необходимости
   function loadYouTubeAPI(callback) {
     if (window.YT && window.YT.Player) {
       callback();
@@ -1117,7 +1220,6 @@
     }
   }
 
-  // Универсальная установка громкости
   function applyVolumeToSources(volume) {
     if (useSeparateAudio && bgAudio) {
       if (bgVideo) { bgVideo.volume = 0; bgVideo.muted = true; }
@@ -1168,11 +1270,10 @@
       }
     }
 
-    // 2. НАСТРОЙКА ФОНА (Определяем YouTube или Видеофайл)
+    // 2. НАСТРОЙКА ФОНА
     const ytData = parseYouTubeUrl(bg);
 
     if (ytData) {
-      // Это YouTube ссылка
       if (bgVideo) bgVideo.style.display = 'none';
       let ytContainer = document.getElementById('yt-bg-player');
       
@@ -1226,7 +1327,6 @@
       });
 
     } else {
-      // Это локальное видео или ссылка на mp4 файл
       const ytContainer = document.getElementById('yt-bg-player');
       if (ytContainer) ytContainer.style.display = 'none';
       if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
@@ -1243,7 +1343,6 @@
       }
     }
 
-    // Применяем актуальную громкость после всех изменений
     applyVolumeToSources(parseFloat(volumeSlider.value));
   });
 
@@ -1260,10 +1359,6 @@
     if (layoutContainer) {
       layoutContainer.classList.remove('content-blur-state');
       layoutContainer.classList.add('content-ready-state');
-    }
-    if (bottomContainer) {
-      bottomContainer.classList.remove('content-blur-state');
-      bottomContainer.classList.add('content-ready-state');
     }
 
     const initialVol = parseFloat(volumeSlider.value);
@@ -1318,7 +1413,6 @@
     const btn = document.getElementById('cardToggleBtn');
     const label = document.getElementById('cardToggleLabel');
     const isHidden = layoutContainer.classList.toggle('layout-hidden');
-    if (bottomContainer) bottomContainer.classList.toggle('layout-hidden', isHidden);
 
     if (isHidden) {
       btn.firstChild.textContent = '👀 ';
@@ -1330,7 +1424,7 @@
   };
 
   // ==========================================
-  // === ЧАСТИЦЫ И ПАРАЛЛАКС (ИЗ ИСХОДНОГО КОДА) ===
+  // === ЧАСТИЦЫ И ПАРАЛЛАКС ===
   // ==========================================
   const canvas = document.getElementById('particles');
   const ctx = canvas.getContext('2d');
@@ -1380,19 +1474,28 @@
   initParticles();
   animateParticles();
 
+  // ИНДИВИДУАЛЬНАЯ АНИМАЦИЯ ПАРАЛЛАКСА ДЛЯ ВСЕХ КАРТОЧЕК
   const mainCard = document.getElementById('mainCard');
   const socialCard = document.getElementById('socialCard');
+  const quotesCard = document.getElementById('quotesCard');
   const platformsCard = document.getElementById('platformsCard');
-  const phraseCard = document.getElementById('phraseCard');
+  const spotifyCard = document.getElementById('spotifyCard');
 
   if (!isMobile && window.matchMedia('(hover: hover)').matches) {
     document.addEventListener('mousemove', (e) => {
       const x = (window.innerWidth / 2 - e.clientX) / 35;
       const y = (window.innerHeight / 2 - e.clientY) / 35;
+
+      // Центральная карточка
       if (mainCard) mainCard.style.transform = `translate(${x}px, ${y}px)`;
+      
+      // Левая колонка (Social & Quote)
       if (socialCard) socialCard.style.transform = `translate(${x * 1.2}px, ${y * 1.2}px)`;
+      if (quotesCard) quotesCard.style.transform = `translate(${x * 1.1}px, ${y * 1.1}px)`;
+      
+      // Правая колонка (Platforms & Spotify Music)
       if (platformsCard) platformsCard.style.transform = `translate(${x * 1.4}px, ${y * 1.4}px)`;
-      if (phraseCard) phraseCard.style.transform = `translate(${x * 1.3}px, ${y * 1.3}px)`;
+      if (spotifyCard) spotifyCard.style.transform = `translate(${x * 1.3}px, ${y * 1.3}px)`;
     });
   }
 </script>
