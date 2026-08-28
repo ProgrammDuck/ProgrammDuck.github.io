@@ -1049,256 +1049,352 @@
   <canvas id="particles"></canvas>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-  <script>
-    // ==========================================
-    // === НАСТРОЙКИ САЙТА (КОНФИГУРАЦИЯ) ===
-    // ==========================================
+<!-- Подключаем Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 1. Укажите путь к вашему фоновому видео:
-    const VIDEO_SRC = 'Sources/MyVideo2.mp4'; 
-    //onst VIDEO_SRC = 'Sources/MyVideo.mp4'; 
+  // КОНФИГУРАЦИЯ FIREBASE (Возьми из Firebase Console -> Project Settings)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDmvhA6y0SF1CEZCqVXTZvlQ8EimHZI2yI",
+    authDomain: "test-da9af.firebaseapp.com",
+    databaseURL: "https://test-da9af-default-rtdb.firebaseio.com",
+    projectId: "test-da9af",
+    storageBucket: "test-da9af.firebasestorage.app",
+    messagingSenderId: "279738673870",
+    appId: "1:279738673870:web:f247eb0ac7d092f265fe9f"
+  };
 
-    // 2. Укажите путь к фоновому звуку:
-    // (Если оставить пустым или сделать равным VIDEO_SRC, звук будет идти из самого видео.
-    // Если указать путь/ссылку на аудиофайл — звук видео заглушится, и заиграет этот трек).
-    //const AUDIO_SRC = 'https://cdn1.deliciousoranges.com/s1/get/music/20250822/QKooK_-_Specnaz_79529390.mp3'; 
-    const AUDIO_SRC = ''
 
-    // ==========================================
-    // === ИНИЦИАЛИЗАЦИЯ ВИДЕО И ЗВУКА ===
-    // ==========================================
-    const bgVideo = document.getElementById('bg-video');
-    
-    if (bgVideo) {
-      const sourceElement = bgVideo.querySelector('source');
-      if (sourceElement) {
-        sourceElement.src = VIDEO_SRC;
-        bgVideo.load();
-      }
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const siteRef = ref(db, 'siteState');
+
+  // DOM ЭЛЕМЕНТЫ
+  const bgVideo = document.getElementById('bg-video');
+  const layoutContainer = document.getElementById('layoutContainer');
+  const bottomContainer = document.getElementById('bottomContainer');
+  const soundBtn = document.getElementById('soundToggleBtn');
+  const volumeSlider = document.getElementById('volumeSlider');
+
+  // СОСТОЯНИЯ
+  let bgAudio = null;
+  let ytPlayer = null;
+  let useSeparateAudio = false;
+  let lastActiveVolume = 0.5;
+  let isEntered = false;
+  let currentBgSource = ''; 
+
+  // ==========================================
+  // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (YOUTUBE И ФАЙЛЫ) ===
+  // ==========================================
+
+  // Вспомогательная функция для парсинга YouTube URL
+  function parseYouTubeUrl(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url ? url.match(regExp) : null;
+    if (match && match[2].length === 11) {
+      const urlObj = new URL(url);
+      return {
+        videoId: match[2],
+        start: parseInt(urlObj.searchParams.get("start") || urlObj.searchParams.get("t") || "0", 10),
+        end: parseInt(urlObj.searchParams.get("end") || "0", 10)
+      };
     }
+    return null;
+  }
 
-    const useSeparateAudio = AUDIO_SRC && AUDIO_SRC !== VIDEO_SRC;
-    let bgAudio = null;
-
-    if (useSeparateAudio) {
-      bgAudio = new Audio(AUDIO_SRC);
-      bgAudio.loop = true;
-      bgAudio.preload = 'auto';
+  // Загрузка IFrame API для YouTube при необходимости
+  function loadYouTubeAPI(callback) {
+    if (window.YT && window.YT.Player) {
+      callback();
+    } else {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      window.onYouTubeIframeAPIReady = callback;
     }
+  }
 
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-
-    let particlesArray = [];
-
-    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-    const numberOfParticles = isMobile ? 35 : 80;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,213,79,0.6)';
-        ctx.fill();
-      }
-    }
-
-    function initParticles() {
-      particlesArray = [];
-      for (let i = 0; i < numberOfParticles; i++) {
-        particlesArray.push(new Particle());
-      }
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particlesArray.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      requestAnimationFrame(animateParticles);
-    }
-
-    initParticles();
-    animateParticles();
-
-    const mainCard = document.getElementById('mainCard');
-    const socialCard = document.getElementById('socialCard');
-    const platformsCard = document.getElementById('platformsCard');
-    const phraseCard = document.getElementById('phraseCard');
-
-    if (!isMobile && window.matchMedia('(hover: hover)').matches) {
-      document.addEventListener('mousemove', (e) => {
-        const x = (window.innerWidth / 2 - e.clientX) / 35;
-        const y = (window.innerHeight / 2 - e.clientY) / 35;
-        
-        // Различные коэффициенты смещения (глубина) создают невероятный 3D-эффект
-        if (mainCard) mainCard.style.transform = `translate(${x}px, ${y}px)`;
-        if (socialCard) socialCard.style.transform = `translate(${x * 1.2}px, ${y * 1.2}px)`;
-        if (platformsCard) platformsCard.style.transform = `translate(${x * 1.4}px, ${y * 1.4}px)`;
-        if (phraseCard) phraseCard.style.transform = `translate(${x * 1.3}px, ${y * 1.3}px)`;
-      });
-    }
-
-    // Тонкий гироскопический наклон для мобильных устройств
-    if (window.DeviceOrientationEvent && isMobile) {
-      window.addEventListener('deviceorientation', (e) => {
-        if (e.gamma === null) return;
-        const x = Math.max(-8, Math.min(8, e.gamma / 5));
-        const y = Math.max(-8, Math.min(8, (e.beta - 45) / 10));
-        
-        if (mainCard) mainCard.style.transform = `translate(${x}px, ${y}px)`;
-        if (socialCard) socialCard.style.transform = `translate(${x * 1.1}px, ${y * 1.1}px)`;
-        if (platformsCard) platformsCard.style.transform = `translate(${x * 1.2}px, ${y * 1.2}px)`;
-        if (phraseCard) phraseCard.style.transform = `translate(${x * 1.15}px, ${y * 1.15}px)`;
-      });
-    }
-
-    // === CARD TOGGLE (Скрытие всех карточек макета) ===
-    function toggleCard() {
-      const layoutContainer = document.getElementById('layoutContainer');
-      const bottomContainer = document.getElementById('bottomContainer');
-      const btn = document.getElementById('cardToggleBtn');
-      const label = document.getElementById('cardToggleLabel');
+  // Универсальная установка громкости
+  function applyVolumeToSources(volume) {
+    if (useSeparateAudio && bgAudio) {
+      if (bgVideo) { bgVideo.volume = 0; bgVideo.muted = true; }
+      if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
       
-      const isHidden = layoutContainer.classList.toggle('layout-hidden');
-      if (bottomContainer) {
-        bottomContainer.classList.toggle('layout-hidden', isHidden);
-      }
-
-      if (isHidden) {
-        btn.firstChild.textContent = '👀 ';
-        label.textContent = 'Показать карточки';
-      } else {
-        btn.firstChild.textContent = '🙈 ';
-        label.textContent = 'Скрыть карточки';
-      }
-    }
-
-    const layoutContainer = document.getElementById('layoutContainer');
-    const bottomContainer = document.getElementById('bottomContainer');
-    const soundBtn = document.getElementById('soundToggleBtn');
-    const volumeSlider = document.getElementById('volumeSlider');
-    let lastActiveVolume = 0.5;
-
-    function applyVolumeToSources(volume) {
-      if (useSeparateAudio) {
-        bgVideo.volume = 0;
-        bgVideo.muted = true;
-        if (bgAudio) {
-          bgAudio.volume = volume;
-          bgAudio.muted = (volume === 0);
-        }
-      } else {
+      bgAudio.volume = volume;
+      bgAudio.muted = (volume === 0);
+    } else {
+      if (bgVideo) {
         bgVideo.volume = volume;
         bgVideo.muted = (volume === 0);
       }
+      if (ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(volume * 100);
+        if (volume === 0) ytPlayer.mute(); else ytPlayer.unMute();
+      }
+    }
+  }
+
+  // ==========================================
+  // === ДИНАМИЧЕСКОЕ ОБНОВЛЕНИЕ ИЗ FIREBASE ===
+  // ==========================================
+
+  onValue(siteRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    const bg = data.background || 'Sources/MyVideo2.mp4';
+    const sound = data.sound || '';
+
+    // 1. НАСТРОЙКА ЗВУКА
+    if (sound && sound.trim() !== '' && sound !== bg) {
+      useSeparateAudio = true;
+      if (!bgAudio || bgAudio.src !== sound) {
+        if (bgAudio) { bgAudio.pause(); }
+        bgAudio = new Audio(sound);
+        bgAudio.loop = true;
+        bgAudio.preload = 'auto';
+        if (isEntered) {
+          bgAudio.play().catch(e => console.log("Audio play error:", e));
+        }
+      }
+    } else {
+      useSeparateAudio = false;
+      if (bgAudio) {
+        bgAudio.pause();
+        bgAudio = null;
+      }
     }
 
-    function enterSite() {
-      const overlay = document.getElementById('intro-overlay');
-      overlay.classList.add('fade-out');
+    // 2. НАСТРОЙКА ФОНА (Определяем YouTube или Видеофайл)
+    const ytData = parseYouTubeUrl(bg);
+
+    if (ytData) {
+      // Это YouTube ссылка
+      if (bgVideo) bgVideo.style.display = 'none';
+      let ytContainer = document.getElementById('yt-bg-player');
       
-      bgVideo.classList.remove('content-blur-state');
-      
-      if (layoutContainer) {
-        layoutContainer.classList.remove('content-blur-state');
-        layoutContainer.classList.add('content-ready-state');
-      }
-      if (bottomContainer) {
-        bottomContainer.classList.remove('content-blur-state');
-        bottomContainer.classList.add('content-ready-state');
+      if (!ytContainer) {
+        ytContainer = document.createElement('div');
+        ytContainer.id = 'yt-bg-player';
+        ytContainer.style.cssText = 'position:fixed; top:50%; left:50%; width:100vw; height:56.25vw; min-height:100vh; min-width:177.77vh; transform:translate(-50%, -50%); z-index:-3; pointer-events:none; filter: brightness(0.55) saturate(1.1);';
+        document.body.appendChild(ytContainer);
+      } else {
+        ytContainer.style.display = 'block';
       }
 
-      const initialVol = parseFloat(volumeSlider.value);
-      applyVolumeToSources(initialVol);
+      const playerVars = {
+        autoplay: isEntered ? 1 : 0,
+        controls: 0,
+        showinfo: 0,
+        autohide: 1,
+        modestbranding: 1,
+        playlist: ytData.videoId,
+        loop: 1,
+        start: ytData.start,
+        mute: (useSeparateAudio || volumeSlider.value == 0) ? 1 : 0
+      };
+      if (ytData.end > 0) playerVars.end = ytData.end;
 
-      bgVideo.play().then(() => {
-        updateSoundUI(initialVol);
-      }).catch((err) => {
-        console.log("Autoplay blocked by browser for video.", err);
+      loadYouTubeAPI(() => {
+        if (ytPlayer && ytPlayer.loadVideoById) {
+          ytPlayer.loadVideoById({
+            videoId: ytData.videoId,
+            startSeconds: ytData.start,
+            endSeconds: ytData.end || undefined
+          });
+        } else {
+          ytPlayer = new YT.Player('yt-bg-player', {
+            videoId: ytData.videoId,
+            playerVars: playerVars,
+            events: {
+              'onReady': (e) => {
+                applyVolumeToSources(parseFloat(volumeSlider.value));
+                if (isEntered) e.target.playVideo();
+              },
+              'onStateChange': (e) => {
+                if (e.data === YT.PlayerState.ENDED) {
+                  ytPlayer.seekTo(ytData.start);
+                  ytPlayer.playVideo();
+                }
+              }
+            }
+          });
+        }
       });
 
-      if (useSeparateAudio && bgAudio) {
-        bgAudio.play().then(() => {
-          updateSoundUI(initialVol);
-        }).catch((err) => {
-          console.log("Autoplay blocked by browser for separate audio.", err);
-          applyVolumeToSources(0);
-          updateSoundUI(0);
-        });
-      }
-    }
+    } else {
+      // Это локальное видео или ссылка на mp4 файл
+      const ytContainer = document.getElementById('yt-bg-player');
+      if (ytContainer) ytContainer.style.display = 'none';
+      if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
 
-    function changeVolume(val) {
-      const volume = parseFloat(val);
-      applyVolumeToSources(volume);
-      
-      if (volume > 0) {
-        bgVideo.play().catch(() => {});
-        if (useSeparateAudio && bgAudio) {
-          bgAudio.play().catch(() => {});
+      if (bgVideo) {
+        bgVideo.style.display = 'block';
+        if (currentBgSource !== bg) {
+          currentBgSource = bg;
+          const sourceElement = bgVideo.querySelector('source') || bgVideo;
+          sourceElement.src = bg;
+          bgVideo.load();
+          if (isEntered) bgVideo.play().catch(e => console.log(e));
         }
-        lastActiveVolume = volume;
-      }
-      updateSoundUI(volume);
-    }
-
-    function toggleMute() {
-      const currentVolume = useSeparateAudio ? (bgAudio ? bgAudio.volume : 0) : bgVideo.volume;
-
-      if (currentVolume > 0) {
-        lastActiveVolume = currentVolume;
-        applyVolumeToSources(0);
-        volumeSlider.value = 0;
-        updateSoundUI(0);
-      } else {
-        applyVolumeToSources(lastActiveVolume);
-        volumeSlider.value = lastActiveVolume;
-        
-        bgVideo.play().catch(() => {});
-        if (useSeparateAudio && bgAudio) {
-          bgAudio.play().catch(() => {});
-        }
-        updateSoundUI(lastActiveVolume);
       }
     }
 
-    // === STREAMING_CHUNK: Updating the sound user interface icons dynamically... ===
-    function updateSoundUI(volume) {
-      if (volume === 0) {
-        soundBtn.textContent = '🔇';
-      } else if (volume < 0.4) {
-        soundBtn.textContent = '🔈';
-      } else if (volume < 0.7) {
-        soundBtn.textContent = '🔉';
-      } else {
-        soundBtn.textContent = '🔊';
-      }
+    // Применяем актуальную громкость после всех изменений
+    applyVolumeToSources(parseFloat(volumeSlider.value));
+  });
+
+  // ==========================================
+  // === ВХОД НА САЙТ И УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ===
+  // ==========================================
+
+  window.enterSite = function() {
+    isEntered = true;
+    const overlay = document.getElementById('intro-overlay');
+    overlay.classList.add('fade-out');
+    
+    if (bgVideo) bgVideo.classList.remove('content-blur-state');
+    if (layoutContainer) {
+      layoutContainer.classList.remove('content-blur-state');
+      layoutContainer.classList.add('content-ready-state');
     }
-  </script>
+    if (bottomContainer) {
+      bottomContainer.classList.remove('content-blur-state');
+      bottomContainer.classList.add('content-ready-state');
+    }
+
+    const initialVol = parseFloat(volumeSlider.value);
+    applyVolumeToSources(initialVol);
+
+    if (bgVideo && bgVideo.style.display !== 'none') {
+      bgVideo.play().catch(err => console.log("Video autoplay blocked", err));
+    }
+    if (ytPlayer && ytPlayer.playVideo) {
+      ytPlayer.playVideo();
+    }
+    if (useSeparateAudio && bgAudio) {
+      bgAudio.play().catch(err => console.log("Audio autoplay blocked", err));
+    }
+    
+    updateSoundUI(initialVol);
+  };
+
+  window.changeVolume = function(val) {
+    const volume = parseFloat(val);
+    applyVolumeToSources(volume);
+    
+    if (volume > 0) {
+      if (bgVideo && bgVideo.style.display !== 'none') bgVideo.play().catch(() => {});
+      if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      if (useSeparateAudio && bgAudio) bgAudio.play().catch(() => {});
+      lastActiveVolume = volume;
+    }
+    updateSoundUI(volume);
+  };
+
+  window.toggleMute = function() {
+    const currentVol = parseFloat(volumeSlider.value);
+    if (currentVol > 0) {
+      lastActiveVolume = currentVol;
+      volumeSlider.value = 0;
+      changeVolume(0);
+    } else {
+      volumeSlider.value = lastActiveVolume;
+      changeVolume(lastActiveVolume);
+    }
+  };
+
+  function updateSoundUI(volume) {
+    if (volume === 0) soundBtn.textContent = '🔇';
+    else if (volume < 0.4) soundBtn.textContent = '🔈';
+    else if (volume < 0.7) soundBtn.textContent = '🔉';
+    else soundBtn.textContent = '🔊';
+  }
+
+  window.toggleCard = function() {
+    const btn = document.getElementById('cardToggleBtn');
+    const label = document.getElementById('cardToggleLabel');
+    const isHidden = layoutContainer.classList.toggle('layout-hidden');
+    if (bottomContainer) bottomContainer.classList.toggle('layout-hidden', isHidden);
+
+    if (isHidden) {
+      btn.firstChild.textContent = '👀 ';
+      label.textContent = 'Показать карточки';
+    } else {
+      btn.firstChild.textContent = '🙈 ';
+      label.textContent = 'Скрыть карточки';
+    }
+  };
+
+  // ==========================================
+  // === ЧАСТИЦЫ И ПАРАЛЛАКС (ИЗ ИСХОДНОГО КОДА) ===
+  // ==========================================
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particlesArray = [];
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+  const numberOfParticles = isMobile ? 35 : 80;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 1;
+      this.speedX = (Math.random() - 0.5) * 0.5;
+      this.speedY = (Math.random() - 0.5) * 0.5;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,213,79,0.6)';
+      ctx.fill();
+    }
+  }
+
+  function initParticles() {
+    particlesArray = [];
+    for (let i = 0; i < numberOfParticles; i++) particlesArray.push(new Particle());
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particlesArray.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+  }
+  initParticles();
+  animateParticles();
+
+  const mainCard = document.getElementById('mainCard');
+  const socialCard = document.getElementById('socialCard');
+  const platformsCard = document.getElementById('platformsCard');
+  const phraseCard = document.getElementById('phraseCard');
+
+  if (!isMobile && window.matchMedia('(hover: hover)').matches) {
+    document.addEventListener('mousemove', (e) => {
+      const x = (window.innerWidth / 2 - e.clientX) / 35;
+      const y = (window.innerHeight / 2 - e.clientY) / 35;
+      if (mainCard) mainCard.style.transform = `translate(${x}px, ${y}px)`;
+      if (socialCard) socialCard.style.transform = `translate(${x * 1.2}px, ${y * 1.2}px)`;
+      if (platformsCard) platformsCard.style.transform = `translate(${x * 1.4}px, ${y * 1.4}px)`;
+      if (phraseCard) phraseCard.style.transform = `translate(${x * 1.3}px, ${y * 1.3}px)`;
+    });
+  }
+</script>
 </body>
 </html>
