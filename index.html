@@ -1098,6 +1098,9 @@
   const spotifyContent = document.getElementById('spotifyContent');
   let spotifyInterval = null;
 
+  // Вставьте сюда URL вашего Cloudflare Worker
+  const PROXY_WORKER_URL = "https://icy-credit-dd8f.iliakuzmin5555.workers.dev/";
+
   function formatTime(ms) {
     if (!ms || isNaN(ms)) return "0:00";
     const totalSeconds = Math.floor(ms / 1000);
@@ -1109,18 +1112,19 @@
   async function updateSpotifyWidget() {
     if (!spotifyContent) return;
 
-    if (!DISCORD_USER_ID || DISCORD_USER_ID === "ВАШ_DISCORD_ID_ЗДЕСЬ") {
+    if (!PROXY_WORKER_URL || PROXY_WORKER_URL.includes("ВАШ_WORKER")) {
       spotifyContent.innerHTML = `
         <div class="spotify-idle-state">
           <div class="spotify-idle-icon">🎧</div>
-          <div class="spotify-idle-text">Укажите ваш <b>Discord User ID</b> в файле для трансляции Spotify!</div>
+          <div class="spotify-idle-text">Укажите адрес вашего **Worker Proxy** в скрипте!</div>
         </div>
       `;
       return;
     }
 
     try {
-      const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+      // Запрос отправляется на ваш прокси-сервер вместо прямой передачи client-to-lanyard
+      const response = await fetch(PROXY_WORKER_URL);
       const data = await response.json();
 
       if (data && data.success && data.data && data.data.listening_to_spotify) {
@@ -1170,25 +1174,25 @@
             <div class="spotify-idle-icon">💤</div>
             <div class="spotify-idle-text">Сейчас ничего не играет</div>
           </div>
-          <a class="spotify-listen-btn" href="https://open.spotify.com/user/31covl5xkvrgcv7rdjmylj5salgi" target="_blank" rel="noopener">
+          <a class="spotify-listen-btn" href="https://open.spotify.com" target="_blank" rel="noopener">
             <img src="Sources/spotify.png" alt="Spotify" width="16" height="16" />
             Профиль Spotify
           </a>
         `;
       }
     } catch (err) {
-      console.log("Spotify Lanyard Fetch Error:", err);
+      console.log("Spotify Proxy Fetch Error:", err);
       spotifyContent.innerHTML = `
         <div class="spotify-idle-state">
           <div class="spotify-idle-icon">📻</div>
-          <div class="spotify-idle-text">Не удалось загрузить данные Spotify</div>
+          <div class="spotify-idle-text">Не удалось загрузить данные через прокси</div>
         </div>
       `;
     }
   }
 
   updateSpotifyWidget();
-  spotifyInterval = setInterval(updateSpotifyWidget, 3000);
+  spotifyInterval = setInterval(updateSpotifyWidget, 10000);
 
   // ==========================================
   // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (YOUTUBE И ФАЙЛЫ) ===
